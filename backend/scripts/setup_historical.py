@@ -3,6 +3,7 @@ import os
 import json
 from datetime import datetime
 from loguru import logger
+from sqlalchemy import text
 
 # Fix path import per eseguire lo script da backend/ o root
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
@@ -17,7 +18,18 @@ from app.services.data.cftc_ingestor import CFTCIngestor
 from app.services.data.cot_loader import COTLoaderService
 
 def init_db():
-    logger.info("Initializing Database Schema...")
+    logger.info("Initializing Database Schema (Full Reset)...")
+    # Attenzione: Questo cancella tutti i dati esistenti
+    db = SessionLocal()
+    try:
+        db.execute(text("DROP VIEW IF EXISTS v_weekly_report_changes CASCADE;"))
+        db.commit()
+    except Exception as e:
+        logger.warning(f"Could not drop view: {e}")
+    finally:
+        db.close()
+        
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
 def seed_contracts(db):

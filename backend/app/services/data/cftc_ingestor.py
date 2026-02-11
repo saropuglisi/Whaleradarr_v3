@@ -23,51 +23,59 @@ class CFTCIngestor:
         'CFTC_Contract_Market_Code': 'cftc_contract_code',
         'Market_and_Exchange_Names': 'contract_name_raw',
         'Open_Interest_All': 'open_interest',
+        'Change_in_Open_Interest_All': 'open_interest_chg',
+        
+        # Dealer
         'Dealer_Positions_Long_All': 'dealer_long',
         'Dealer_Positions_Short_All': 'dealer_short',
         'Dealer_Positions_Spread_All': 'dealer_spread',
+        'Change_in_Dealer_Long_All': 'dealer_long_chg',
+        'Change_in_Dealer_Short_All': 'dealer_short_chg',
+        
+        # Asset Mgr
         'Asset_Mgr_Positions_Long_All': 'asset_mgr_long',
         'Asset_Mgr_Positions_Short_All': 'asset_mgr_short',
         'Asset_Mgr_Positions_Spread_All': 'asset_mgr_spread',
+        'Change_in_Asset_Mgr_Long_All': 'asset_mgr_long_chg',
+        'Change_in_Asset_Mgr_Short_All': 'asset_mgr_short_chg',
+        
+        # Lev Money
         'Lev_Money_Positions_Long_All': 'lev_money_long',
         'Lev_Money_Positions_Short_All': 'lev_money_short',
         'Lev_Money_Positions_Spread_All': 'lev_money_spread',
-        'Other_Rept_Positions_Long_All': 'other_rept_long',
-        'Other_Rept_Positions_Short_All': 'other_rept_short',
-        'Other_Rept_Positions_Spread_All': 'other_rept_spread',
+        'Change_in_Lev_Money_Long_All': 'lev_money_long_chg',
+        'Change_in_Lev_Money_Short_All': 'lev_money_short_chg',
+        
         'NonRept_Positions_Long_All': 'non_report_long',
         'NonRept_Positions_Short_All': 'non_report_short'
     }
 
     # Mapping per Disaggregated Futures (Commodities)
-    # Mappiamo le categorie Commodities sulle colonne DB esistenti (Financial)
-    # Managed Money -> Lev Funds (Whales)
-    # Swap Dealers -> Dealer (spesso banche)
-    # Prod/Merc -> Asset Mgr (Proxy imperfetto ma funzionale per il lato commerciale)
     MAPPING_DIS = {
         'CFTC_Contract_Market_Code': 'cftc_contract_code',
         'Market_and_Exchange_Names': 'contract_name_raw',
         'Open_Interest_All': 'open_interest',
+        'Change_in_Open_Interest_All': 'open_interest_chg',
         
         # Swap Dealers -> Dealer
         'Swap_Positions_Long_All': 'dealer_long',
         'Swap_Positions_Short_All': 'dealer_short',
         'Swap_Positions_Spread_All': 'dealer_spread',
+        'Change_in_Swap_Long_All': 'dealer_long_chg',
+        'Change_in_Swap_Short_All': 'dealer_short_chg',
         
-        # Managed Money -> Leveraged Funds (CRITICO: SONO LE WHALES)
+        # Managed Money -> Leveraged Funds (Whales)
         'M_Money_Positions_Long_All': 'lev_money_long',
         'M_Money_Positions_Short_All': 'lev_money_short',
         'M_Money_Positions_Spread_All': 'lev_money_spread',
+        'Change_in_M_Money_Long_All': 'lev_money_long_chg',
+        'Change_in_M_Money_Short_All': 'lev_money_short_chg',
         
-        # Producer/Merchant -> Asset Manager (Lato Commerciale/Hedging Reale)
+        # Producer/Merchant -> Asset Manager
         'Prod_Merc_Positions_Long_All': 'asset_mgr_long',
         'Prod_Merc_Positions_Short_All': 'asset_mgr_short',
-        # Prod/Merc non ha sempre spread column, dipende dal report
-        
-        # Other Reportables
-        'Other_Rept_Positions_Long_All': 'other_rept_long',
-        'Other_Rept_Positions_Short_All': 'other_rept_short',
-        'Other_Rept_Positions_Spread_All': 'other_rept_spread',
+        'Change_in_Prod_Merc_Long_All': 'asset_mgr_long_chg',
+        'Change_in_Prod_Merc_Short_All': 'asset_mgr_short_chg',
         
         'NonRept_Positions_Long_All': 'non_report_long',
         'NonRept_Positions_Short_All': 'non_report_short'

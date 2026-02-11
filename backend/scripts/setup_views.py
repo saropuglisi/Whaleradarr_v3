@@ -1,0 +1,70 @@
+import sys
+import os
+from sqlalchemy import text
+from loguru import logger
+
+# Fix path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+
+from app.db.session import SessionLocal
+
+def create_views():
+    db = SessionLocal()
+    try:
+        logger.info("Creating Optimized SQL Views using physical Change columns...")
+        
+        db.execute(text("DROP VIEW IF EXISTS v_weekly_report_changes CASCADE;"))
+        db.commit()
+
+        # Vista ottimizzata: usiamo le colonne _chg fisiche caricate dal report
+        view_sql = """
+        CREATE VIEW v_weekly_report_changes AS
+        SELECT 
+            c.yahoo_ticker as ticker,
+            c.contract_name,
+            r.report_date,
+            
+            -- 1. DEALER
+            r.dealer_net,
+            (r.dealer_long_chg - r.dealer_short_chg) as dealer_net_change,
+            r.dealer_long,
+            r.dealer_long_chg,
+            r.dealer_short,
+            r.dealer_short_chg,
+
+            -- 2. ASSET MANAGER
+            r.asset_mgr_net,
+            (r.asset_mgr_long_chg - r.asset_mgr_short_chg) as asset_mgr_net_change,
+            r.asset_mgr_long,
+            r.asset_mgr_long_chg,
+            r.asset_mgr_short,
+            r.asset_mgr_short_chg,
+
+            -- 3. LEVERAGED FUNDS (Whales)
+            r.lev_net,
+            (r.lev_long_chg - r.lev_short_chg) as lev_net_change,
+            r.lev_long,
+            r.lev_long_chg,
+            r.lev_short,
+            r.lev_short_chg,
+
+            -- Market
+            r.open_interest,
+            r.open_interest_chg as oi_change
+
+        FROM weekly_reports r
+        JOIN contracts c ON r.contract_id = c.id;
+        """
+        
+        db.execute(text(view_sql))
+        db.commit()
+        logger.success("Optimized View 'v_weekly_report_changes' created (Ratio removed).")
+
+    except Exception as e:
+        logger.error(f"Failed to update view: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    create_views()

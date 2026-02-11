@@ -25,21 +25,30 @@ class COTLoaderService:
             if c_code not in self.contract_map:
                 continue 
 
-            # Mappa colonne DataFrame -> Modello DB
-            # ESCLUDERE colonne generate (lev_gross_exposure)
             db_record = {
                 "contract_id": self.contract_map[c_code],
                 "report_date": row['report_date'],
                 "open_interest": row.get('open_interest', 0),
+                "open_interest_chg": row.get('open_interest_chg', 0),
+                
                 "dealer_long": row.get('dealer_long', 0),
+                "dealer_long_chg": row.get('dealer_long_chg', 0),
                 "dealer_short": row.get('dealer_short', 0),
+                "dealer_short_chg": row.get('dealer_short_chg', 0),
                 "dealer_spread": row.get('dealer_spread', 0),
+                
                 "asset_mgr_long": row.get('asset_mgr_long', 0),
+                "asset_mgr_long_chg": row.get('asset_mgr_long_chg', 0),
                 "asset_mgr_short": row.get('asset_mgr_short', 0),
+                "asset_mgr_short_chg": row.get('asset_mgr_short_chg', 0),
                 "asset_mgr_spread": row.get('asset_mgr_spread', 0),
+                
                 "lev_long": row.get('lev_money_long', 0),
+                "lev_long_chg": row.get('lev_money_long_chg', 0),
                 "lev_short": row.get('lev_money_short', 0),
+                "lev_short_chg": row.get('lev_money_short_chg', 0),
                 "lev_spread": row.get('lev_money_spread', 0),
+                
                 "non_report_long": row.get('non_report_long', 0),
                 "non_report_short": row.get('non_report_short', 0)
             }
@@ -51,22 +60,24 @@ class COTLoaderService:
         # PostgreSQL Upsert
         stmt = insert(WeeklyReport).values(records)
         
-        # Aggiorna tutto tranne chiavi primarie e colonne generate
+        # Escludiamo esplicitamente le colonne Computed per evitare errori in PostgreSQL
+        generated_cols = ['id', 'contract_id', 'report_date', 'lev_gross_exposure', 'dealer_net', 'asset_mgr_net', 'lev_net']
+        
         update_cols = {
             col.name: col 
             for col in stmt.excluded 
-            if col.name not in ['id', 'contract_id', 'report_date', 'lev_gross_exposure']
+            if col.name not in generated_cols
         }
         
         upsert_stmt = stmt.on_conflict_do_update(
-            constraint='uq_contract_report_date', # Constraint name definito nel model
+            constraint='uq_contract_report_date', 
             set_=update_cols
         )
 
         try:
             self.db.execute(upsert_stmt)
             self.db.commit()
-            logger.success(f"Upserted {len(records)} reports")
+            logger.success(f"Upserted {len(records)} reports with official changes")
         except Exception as e:
             self.db.rollback()
             logger.error(f"DB Error: {e}")
