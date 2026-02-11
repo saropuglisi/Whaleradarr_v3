@@ -1,0 +1,47 @@
+[
+  {
+    "cftc_contract_code": "13874+",
+    "contract_name": "S&P 500 CONSOLIDATED",
+    "market_category": "stock_index",
+    "yahoo_ticker": "ES=F",
+    "exchange": "CME",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 50
+  },
+  {
+    "cftc_contract_code": "133741",
+    "contract_name": "BITCOIN",
+    "market_category": "crypto",
+    "yahoo_ticker": "BTC=F",
+    "exchange": "CME",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 5
+  },
+  {
+    "cftc_contract_code": "099741",
+    "contract_name": "EURO FX",
+    "market_category": "currency",
+    "yahoo_ticker": "6E=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 125000
+  },
+  {
+    "cftc_contract_code": "088691",
+    "contract_name": "GOLD",
+    "market_category": "metal",
+    "yahoo_ticker": "GC=F",
+    "exchange": "COMEX",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 100
+  },
+  {
+    "cftc_contract_code": "067651",
+    "contract_name": "CRUDE OIL",
+    "market_category": "energy",
+    "yahoo_ticker": "CL=F",
+    "exchange": "NYMEX",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 1000
+  }
+]
