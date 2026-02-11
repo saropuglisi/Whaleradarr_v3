@@ -11,12 +11,12 @@ from app.db.session import SessionLocal
 def create_views():
     db = SessionLocal()
     try:
-        logger.info("Creating Optimized SQL Views using physical Change columns...")
+        logger.info("Creating Optimized SQL Views with Ratios and Changes...")
         
         db.execute(text("DROP VIEW IF EXISTS v_weekly_report_changes CASCADE;"))
         db.commit()
 
-        # Vista ottimizzata: usiamo le colonne _chg fisiche caricate dal report
+        # Vista ottimizzata completa
         view_sql = """
         CREATE VIEW v_weekly_report_changes AS
         SELECT 
@@ -31,6 +31,7 @@ def create_views():
             r.dealer_long_chg,
             r.dealer_short,
             r.dealer_short_chg,
+            r.dealer_ls_ratio,
 
             -- 2. ASSET MANAGER
             r.asset_mgr_net,
@@ -39,6 +40,7 @@ def create_views():
             r.asset_mgr_long_chg,
             r.asset_mgr_short,
             r.asset_mgr_short_chg,
+            r.asset_mgr_ls_ratio,
 
             -- 3. LEVERAGED FUNDS (Whales)
             r.lev_net,
@@ -47,6 +49,7 @@ def create_views():
             r.lev_long_chg,
             r.lev_short,
             r.lev_short_chg,
+            r.lev_ls_ratio,
 
             -- Market
             r.open_interest,
@@ -58,7 +61,7 @@ def create_views():
         
         db.execute(text(view_sql))
         db.commit()
-        logger.success("Optimized View 'v_weekly_report_changes' created (Ratio removed).")
+        logger.success("Optimized View 'v_weekly_report_changes' created with all metrics.")
 
     except Exception as e:
         logger.error(f"Failed to update view: {e}")

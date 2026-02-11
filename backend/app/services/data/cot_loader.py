@@ -25,6 +25,11 @@ class COTLoaderService:
             if c_code not in self.contract_map:
                 continue 
 
+            # Calcolo Ratio (evitiamo div zero)
+            def calc_ratio(l, s):
+                l, s = float(l), float(s)
+                return round(l / s, 4) if s > 0 else l
+
             db_record = {
                 "contract_id": self.contract_map[c_code],
                 "report_date": row['report_date'],
@@ -36,18 +41,21 @@ class COTLoaderService:
                 "dealer_short": row.get('dealer_short', 0),
                 "dealer_short_chg": row.get('dealer_short_chg', 0),
                 "dealer_spread": row.get('dealer_spread', 0),
+                "dealer_ls_ratio": calc_ratio(row.get('dealer_long', 0), row.get('dealer_short', 0)),
                 
                 "asset_mgr_long": row.get('asset_mgr_long', 0),
                 "asset_mgr_long_chg": row.get('asset_mgr_long_chg', 0),
                 "asset_mgr_short": row.get('asset_mgr_short', 0),
                 "asset_mgr_short_chg": row.get('asset_mgr_short_chg', 0),
                 "asset_mgr_spread": row.get('asset_mgr_spread', 0),
+                "asset_mgr_ls_ratio": calc_ratio(row.get('asset_mgr_long', 0), row.get('asset_mgr_short', 0)),
                 
                 "lev_long": row.get('lev_money_long', 0),
                 "lev_long_chg": row.get('lev_money_long_chg', 0),
                 "lev_short": row.get('lev_money_short', 0),
                 "lev_short_chg": row.get('lev_money_short_chg', 0),
                 "lev_spread": row.get('lev_money_spread', 0),
+                "lev_ls_ratio": calc_ratio(row.get('lev_money_long', 0), row.get('lev_money_short', 0)),
                 
                 "non_report_long": row.get('non_report_long', 0),
                 "non_report_short": row.get('non_report_short', 0)

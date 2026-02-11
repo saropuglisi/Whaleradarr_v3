@@ -16,6 +16,7 @@ class WeeklyReport(Base):
     dealer_short_chg = Column(BigInteger, default=0)
     dealer_spread = Column(BigInteger, default=0)
     dealer_net = Column(BigInteger, Computed("dealer_long - dealer_short", persisted=True))
+    dealer_ls_ratio = Column(Float, default=1.0)
     
     # --- ASSET MANAGER ---
     asset_mgr_long = Column(BigInteger, default=0)
@@ -24,6 +25,7 @@ class WeeklyReport(Base):
     asset_mgr_short_chg = Column(BigInteger, default=0)
     asset_mgr_spread = Column(BigInteger, default=0)
     asset_mgr_net = Column(BigInteger, Computed("asset_mgr_long - asset_mgr_short", persisted=True))
+    asset_mgr_ls_ratio = Column(Float, default=1.0)
     
     # --- LEVERAGED FUNDS (Whales) ---
     lev_long = Column(BigInteger, default=0)
@@ -32,6 +34,7 @@ class WeeklyReport(Base):
     lev_short_chg = Column(BigInteger, default=0)
     lev_spread = Column(BigInteger, default=0)
     lev_net = Column(BigInteger, Computed("lev_long - lev_short", persisted=True))
+    lev_ls_ratio = Column(Float, default=1.0)
     
     # Gross Exposure
     lev_gross_exposure = Column(BigInteger, Computed("lev_long + lev_short", persisted=True))
