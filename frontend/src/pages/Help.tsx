@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, Activity, BarChart2, ShieldCheck, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Activity, BarChart2, ShieldCheck, TrendingUp, Clock, Minus, TrendingDown } from 'lucide-react';
 
 const Help: React.FC = () => {
     return (
@@ -151,6 +151,43 @@ const Help: React.FC = () => {
                         <span>Medium (50-80)</span>
                         <span>High (&gt;80)</span>
                     </div>
+                </div>
+
+                {/* Execution Timing (Technical Sentiment) */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-blue-500/30 transition-colors">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-3 rounded-lg bg-blue-500/20 text-blue-500">
+                            <Clock size={24} />
+                        </div>
+                        <h2 className="text-2xl font-bold">Execution Timing</h2>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                        Technical sentiment signals that identify high-probability entry and exit zones using Daily Price Data (RSI, EMA, and Trend).
+                    </p>
+                    <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
+                        <li className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 rounded bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 font-bold">Entry Zone</span>
+                                <span className="text-xs text-gray-400">(Oversold + Bullish Trend)</span>
+                            </div>
+                            <span>Best time to buy. RSI is low (&lt;30) and the price is above long-term EMAs (EMA 50 &gt; EMA 200).</span>
+                        </li>
+                        <li className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 rounded bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 font-bold">Exit Zone</span>
+                                <span className="text-xs text-gray-400">(Overbought + Bearish Trend)</span>
+                            </div>
+                            <span>Potential trend exhaustion. RSI is high (&gt;70) while the price remains in a bearish structure.</span>
+                        </li>
+                        <li className="flex items-center gap-2 text-gray-400">
+                            <TrendingUp size={14} className="text-green-400" />
+                            <span>Trend tracking: Bullish (Price &gt; EMA 50 &gt; EMA 200)</span>
+                        </li>
+                        <li className="flex items-center gap-2 text-gray-400">
+                            <TrendingDown size={14} className="text-red-400" />
+                            <span>Trend tracking: Bearish (Price &lt; EMA 50 &lt; EMA 200)</span>
+                        </li>
+                    </ul>
                 </div>
 
             </div>

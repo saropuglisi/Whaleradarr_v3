@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
+from typing import Optional, Dict, Any
 from app.schemas.report import WeeklyReportSchema
 
 class WhaleAlertSchema(BaseModel):
@@ -19,6 +19,10 @@ class WhaleAlertSchema(BaseModel):
     
     # Nested contract info (optional, or handled via join in endpoint)
     contract_name: Optional[str] = None
+    
+    # Technical timing signals
+    technical_signal: Optional[str] = None
+    technical_context: Optional[Dict[str, Any]] = None
 
     class Config:
         from_attributes = True

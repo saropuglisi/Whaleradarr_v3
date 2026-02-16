@@ -18,3 +18,4 @@ pytest>=8.3.3
 loguru>=0.7.2
 tenacity>=9.0.0
 requests>=2.32.3
+pandas_ta>=0.3.14b0

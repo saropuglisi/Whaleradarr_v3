@@ -122,3 +122,71 @@ class PriceLoaderService:
                     close_vs_vwap_pct = ((close_price - reporting_vwap) / reporting_vwap) * 100
                     
         return reporting_vwap, close_vs_vwap_pct
+
+    def fetch_and_load_daily_prices(self, days_back: int = 365):
+        """
+        Fetch and store daily OHLCV data for technical analysis.
+        Unlike the weekly loader, this stores ALL trading days.
+        """
+        from app.models.daily_price import DailyPrice
+        
+        contracts = self.db.query(Contract).filter(Contract.yahoo_ticker != None).all()
+        
+        for contract in contracts:
+            logger.info(f"Fetching daily prices for {contract.contract_name} ({contract.yahoo_ticker})...")
+            
+            ticker = yf.Ticker(contract.yahoo_ticker)
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days_back)
+            
+            df = ticker.history(start=start_date, end=end_date, interval="1d")
+            
+            if df.empty:
+                logger.warning(f"No daily price data found for {contract.yahoo_ticker}")
+                continue
+            
+            # Remove timezone for DB compatibility
+            df.index = df.index.tz_localize(None)
+            df = df.reset_index().rename(columns={'Date': 'date'})
+            df['date'] = df['date'].dt.date
+            
+            # Prepare records for upsert
+            records = []
+            for _, row in df.iterrows():
+                if pd.isna(row['Close']):
+                    continue
+                
+                db_record = {
+                    "contract_id": contract.id,
+                    "date": row['date'],
+                    "open_price": float(row['Open']),
+                    "high_price": float(row['High']),
+                    "low_price": float(row['Low']),
+                    "close_price": float(row['Close']),
+                    "volume": int(row['Volume']) if not pd.isna(row['Volume']) else 0,
+                    "data_source": "yahoo"
+                }
+                records.append(db_record)
+            
+            if not records:
+                continue
+            
+            # Upsert to PostgreSQL
+            stmt = insert(DailyPrice).values(records)
+            update_cols = {
+                col.name: col 
+                for col in stmt.excluded 
+                if col.name not in ['id', 'contract_id', 'date']
+            }
+            upsert_stmt = stmt.on_conflict_do_update(
+                constraint='uq_contract_daily_price',
+                set_=update_cols
+            )
+            
+            try:
+                self.db.execute(upsert_stmt)
+                self.db.commit()
+                logger.success(f"Upserted {len(records)} daily price records for {contract.contract_name}")
+            except Exception as e:
+                self.db.rollback()
+                logger.error(f"Error saving daily prices for {contract.contract_name}: {e}")

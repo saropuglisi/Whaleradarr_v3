@@ -7,12 +7,17 @@ import { Activity } from 'lucide-react';
 const Dashboard: React.FC = () => {
     const [alerts, setAlerts] = useState<WhaleAlert[]>([]);
     const [loading, setLoading] = useState(true);
+    const [contractCount, setContractCount] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const data = await api.getAlerts();
                 setAlerts(data);
+
+                // Get unique contract count
+                const uniqueContracts = new Set(data.map(a => a.contract_id));
+                setContractCount(uniqueContracts.size);
             } catch (error) {
                 console.error("Failed to fetch alerts:", error);
             } finally {
@@ -51,14 +56,14 @@ const Dashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Stats Overview (Placeholder for now) */}
+                {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-6 shadow-sm dark:shadow-none">
                         <div className="flex items-center gap-2 mb-2">
                             <Activity className="text-blue-500 dark:text-blue-400" size={20} />
-                            <h3 className="text-gray-600 dark:text-gray-300 font-medium">Total Alerts</h3>
+                            <h3 className="text-gray-600 dark:text-gray-300 font-medium">Contracts Tracked</h3>
                         </div>
-                        <p className="text-3xl font-bold text-gray-900 dark:text-white">{alerts.length}</p>
+                        <p className="text-3xl font-bold text-gray-900 dark:text-white">{contractCount}</p>
                     </div>
                 </div>
 

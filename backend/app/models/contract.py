@@ -28,4 +28,5 @@ class Contract(Base):
     # Relazioni
     reports = relationship("WeeklyReport", back_populates="contract", cascade="all, delete-orphan")
     prices = relationship("WeeklyPrice", back_populates="contract", cascade="all, delete-orphan")
+    daily_prices = relationship("DailyPrice", back_populates="contract", cascade="all, delete-orphan")
     alerts = relationship("WhaleAlert", back_populates="contract", cascade="all, delete-orphan")

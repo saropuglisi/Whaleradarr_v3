@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { WhaleAlert } from '../types/api';
-import { ArrowUpRight, ArrowDownRight, Activity, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Activity, ChevronDown, ChevronUp, Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface AlertsTableProps {
     alerts: WhaleAlert[];
@@ -46,14 +47,14 @@ const AlertsTable: React.FC<AlertsTableProps> = ({ alerts }) => {
     };
 
     return (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/40 backdrop-blur-md shadow-sm dark:shadow-none">
+        <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/40 backdrop-blur-md shadow-sm dark:shadow-none">
             <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
                 <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase text-gray-500 dark:text-gray-300">
                     <tr>
                         <th className="px-6 py-4 font-semibold w-8"></th>
-                        <th className="px-6 py-4 font-semibold">Report Date</th>
                         <th className="px-6 py-4 font-semibold">Contract</th>
                         <th className="px-6 py-4 font-semibold">Signal</th>
+                        <th className="px-6 py-4 font-semibold">Timing</th>
                         <th className="px-6 py-4 font-semibold">Z-Score</th>
                         <th className="px-6 py-4 font-semibold">Context</th>
                         <th className="px-6 py-4 font-semibold text-right">Confidence</th>
@@ -66,21 +67,65 @@ const AlertsTable: React.FC<AlertsTableProps> = ({ alerts }) => {
                                 <td className="px-6 py-4 text-center">
                                     {expandedAlerts.includes(alert.id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                 </td>
-                                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                    {new Date(alert.report_date).toLocaleDateString('it-IT')}
+                                <td className="px-6 py-4">
+                                    <Link
+                                        to={`/contract/${alert.contract_id}`}
+                                        className="text-gray-900 dark:text-white font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {alert.contract_name || `Contract #${alert.contract_id}`}
+                                    </Link>
                                 </td>
-                                <td className="px-6 py-4 text-gray-900 dark:text-white font-bold">{alert.contract_name || `Contract #${alert.contract_id}`}</td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getLevelColor(alert.alert_level)}`}>
                                         {alert.alert_level}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
+                                    {alert.technical_signal && alert.technical_context ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="group relative">
+                                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium $
+                                                    {alert.technical_signal.includes('Entry') ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' :
+                                                     alert.technical_signal.includes('Exit') ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' :
+                                                     'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400'}`}>
+                                                    <Clock size={12} />
+                                                    {alert.technical_signal}
+                                                </span>
+                                                {/* Tooltip */}
+                                                <div className="absolute left-0 top-full mt-2 w-48 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-300">RSI:</span>
+                                                            <span className="font-semibold">{alert.technical_context.rsi?.toFixed(1) || 'N/A'}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-300">Trend:</span>
+                                                            <span className="flex items-center gap-1 font-semibold">
+                                                                {alert.technical_context.trend === 'bullish' && <TrendingUp size={12} className="text-green-400" />}
+                                                                {alert.technical_context.trend === 'bearish' && <TrendingDown size={12} className="text-red-400" />}
+                                                                {alert.technical_context.trend === 'neutral' && <Minus size={12} className="text-gray-400" />}
+                                                                {alert.technical_context.trend || 'N/A'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-300">EMA 50:</span>
+                                                            <span className="font-semibold">{alert.technical_context.ema_50 || 'N/A'}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400 text-xs">Loading...</span>
+                                    )}
+                                </td>
+                                <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
-                                        <span className={`font-mono font-bold ${alert.z_score > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                            {alert.z_score.toFixed(2)}
+                                        <span className={`font-mono font-bold ${(alert.z_score || 0) > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                            {typeof alert.z_score === 'number' ? alert.z_score.toFixed(2) : 'N/A'}
                                         </span>
-                                        {alert.z_score > 0 ? <ArrowUpRight size={14} className="text-green-600 dark:text-green-400" /> : <ArrowDownRight size={14} className="text-red-600 dark:text-red-400" />}
+                                        {(alert.z_score || 0) > 0 ? <ArrowUpRight size={14} className="text-green-600 dark:text-green-400" /> : <ArrowDownRight size={14} className="text-red-600 dark:text-red-400" />}
 
                                         {/* Delta Indicator */}
                                         {alert.z_score_delta !== undefined && alert.z_score_delta !== null && (

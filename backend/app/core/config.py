@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "user"
     POSTGRES_PASSWORD: str = "password"
     POSTGRES_DB: str = "whaleradarr"
-    POSTGRES_HOST: str = "postgres"
-    POSTGRES_PORT: str = "5432"
+    POSTGRES_HOST: str = "127.0.0.1"
+    POSTGRES_PORT: str = "5433"
     
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
@@ -17,6 +17,6 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
-        # env_file = ".env"
+        # env_file = ".env"  # Disabled due to macOS permission issues
 
 settings = Settings()

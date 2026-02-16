@@ -43,5 +43,95 @@
     "exchange": "NYMEX",
     "expiry_rule": "third_friday",
     "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "20974+",
+    "contract_name": "NASDAQ 100",
+    "market_category": "stock_index",
+    "yahoo_ticker": "NQ=F",
+    "exchange": "CME",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 20
+  },
+  {
+    "cftc_contract_code": "124603",
+    "contract_name": "DOW JONES",
+    "market_category": "stock_index",
+    "yahoo_ticker": "YM=F",
+    "exchange": "CBOT",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 5
+  },
+  {
+    "cftc_contract_code": "097741",
+    "contract_name": "JAPANESE YEN",
+    "market_category": "currency",
+    "yahoo_ticker": "6J=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 12500000
+  },
+  {
+    "cftc_contract_code": "096742",
+    "contract_name": "BRITISH POUND",
+    "market_category": "currency",
+    "yahoo_ticker": "6B=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 62500
+  },
+  {
+    "cftc_contract_code": "090741",
+    "contract_name": "CANADIAN DOLLAR",
+    "market_category": "currency",
+    "yahoo_ticker": "6C=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 100000
+  },
+  {
+    "cftc_contract_code": "232741",
+    "contract_name": "AUSTRALIAN DOLLAR",
+    "market_category": "currency",
+    "yahoo_ticker": "6A=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 100000
+  },
+  {
+    "cftc_contract_code": "084691",
+    "contract_name": "SILVER",
+    "market_category": "metal",
+    "yahoo_ticker": "SI=F",
+    "exchange": "COMEX",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 5000
+  },
+  {
+    "cftc_contract_code": "023651",
+    "contract_name": "NATURAL GAS",
+    "market_category": "energy",
+    "yahoo_ticker": "NG=F",
+    "exchange": "NYMEX",
+    "expiry_rule": "third_business_day",
+    "contract_unit_value": 10000
+  },
+  {
+    "cftc_contract_code": "085692",
+    "contract_name": "COPPER",
+    "market_category": "metal",
+    "yahoo_ticker": "HG=F",
+    "exchange": "COMEX",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 25000
+  },
+  {
+    "cftc_contract_code": "043602",
+    "contract_name": "10-YEAR T-NOTE",
+    "market_category": "interest_rate",
+    "yahoo_ticker": "ZN=F",
+    "exchange": "CBOT",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 1000
   }
 ]

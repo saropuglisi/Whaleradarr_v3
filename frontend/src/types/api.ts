@@ -57,4 +57,11 @@ export interface WhaleAlert {
     is_rollover_week: boolean;
     z_score_delta?: number;
     report?: WeeklyReport;
+    technical_signal?: string;
+    technical_context?: {
+        rsi?: number;
+        trend?: string;
+        ema_50?: number;
+        ema_200?: number;
+    };
 }
