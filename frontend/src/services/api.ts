@@ -25,4 +25,13 @@ export const api = {
         const response = await apiClient.get<Contract>(`/contracts/${id}`);
         return response.data;
     },
+
+    getHeatmap: async (weeks: number = 12, category?: string): Promise<any> => {
+        const params = new URLSearchParams();
+        params.append('weeks', weeks.toString());
+        if (category) params.append('category', category);
+
+        const response = await apiClient.get<any>(`/analysis/heatmap?${params.toString()}`);
+        return response.data;
+    },
 };

@@ -67,6 +67,17 @@ const Navbar: React.FC = () => {
                         </Link>
 
                         <Link
+                            to="/analysis"
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/analysis')
+                                ? 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                                }`}
+                        >
+                            <BarChart3 size={18} className="rotate-90" />
+                            Heatmap
+                        </Link>
+
+                        <Link
                             to="/help"
                             className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/help')
                                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10'

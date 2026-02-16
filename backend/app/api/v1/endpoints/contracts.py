@@ -126,6 +126,8 @@ def get_contract_history(
                 "lev_long": float(report.lev_long),
                 "lev_short": float(report.lev_short),
                 "lev_net": float(report.lev_net),
+                "non_report_long": float(report.non_report_long) if report.non_report_long else 0,
+                "non_report_short": float(report.non_report_short) if report.non_report_short else 0,
                 "open_interest": float(report.open_interest)
             }
             for report in reports
@@ -145,6 +147,9 @@ def get_contract_history(
         "price_history": [
             {
                 "report_date": price.report_date.isoformat(),
+                "open_price": float(price.open_price) if price.open_price else None,
+                "high_price": float(price.high_price) if price.high_price else None,
+                "low_price": float(price.low_price) if price.low_price else None,
                 "close_price": float(price.close_price),
                 "reporting_vwap": float(price.reporting_vwap) if price.reporting_vwap else None,
                 "close_vs_vwap_pct": float(price.close_vs_vwap_pct) if price.close_vs_vwap_pct else None
@@ -279,4 +284,41 @@ def get_contract_reports(
             }
             for report in reports
         ]
+    }
+
+
+@router.get("/{contract_id}/historical-edge")
+def get_historical_edge(
+    contract_id: int,
+    threshold: float = 20.0,
+    forward_weeks: int = 4,
+    lookback_years: int = 5,
+    db: Session = Depends(get_db)
+):
+    """
+    Get historical edge analysis for sentiment gap signals.
+    Backtests performance when sentiment gap exceeds threshold.
+    """
+    from app.services.analysis.historical_edge import analyze_historical_edge
+    
+    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Analyze for multiple thresholds
+    results = []
+    for thresh in [10.0, 20.0, 30.0]:
+        analysis = analyze_historical_edge(
+            db=db,
+            contract_id=contract_id,
+            threshold=thresh,
+            forward_weeks=forward_weeks,
+            lookback_years=lookback_years
+        )
+        results.append(analysis)
+    
+    return {
+        "contract_id": contract_id,
+        "contract_name": contract.contract_name,
+        "analyses": results
     }

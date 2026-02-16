@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Activity, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import SeasonalityChart from '../components/SeasonalityChart';
 import FullReportsTable from '../components/FullReportsTable';
-import PriceCorrelationChart from '../components/PriceCorrelationChart';
+import AdvancedPriceChart from '../components/AdvancedPriceChart';
+import SentimentGauge from '../components/SentimentGauge';
+import SentimentGapHistoryChart from '../components/SentimentGapHistoryChart';
+import COTOscillator from '../components/COTOscillator';
+import PriceDistanceIndicator from '../components/PriceDistanceIndicator';
+import HistoricalEdge from '../components/HistoricalEdge';
 
 
 interface HistoricalReport {
@@ -18,6 +23,8 @@ interface HistoricalReport {
     lev_long: number;
     lev_short: number;
     lev_net: number;
+    non_report_long: number;
+    non_report_short: number;
     open_interest: number;
 }
 
@@ -33,44 +40,93 @@ interface HistoricalAlert {
 
 interface PriceHistory {
     report_date: string;
+    open_price?: number;
+    high_price?: number;
+    low_price?: number;
     close_price: number;
-    reporting_vwap: number | null;
-    close_vs_vwap_pct: number | null;
+    reporting_vwap?: number;
 }
 
 interface ContractHistory {
     contract_id: number;
     contract_name: string;
+}
+
+interface ContractBasicDetail {
+    id: number;
+    contract_name: string;
+    market_category: string;
+    exchange?: string;
+    yahoo_ticker: string;
+    is_active?: boolean;
+}
+
+interface ContractHistoryData {
     historical_reports: HistoricalReport[];
     historical_alerts: HistoricalAlert[];
     price_history: PriceHistory[];
 }
 
+// Helper function to calculate sentiment gap
+const calculateSentimentGap = (report: HistoricalReport): number => {
+    const whaleTotal = Math.abs(report.asset_mgr_long || 0) + Math.abs(report.asset_mgr_short || 0);
+    const retailTotal = Math.abs(report.non_report_long || 0) + Math.abs(report.non_report_short || 0);
+
+    if (whaleTotal === 0 || retailTotal === 0) return 0;
+
+    const whaleNet = (report.asset_mgr_long || 0) - (report.asset_mgr_short || 0);
+    const retailNet = (report.non_report_long || 0) - (report.non_report_short || 0);
+
+    const whalePct = (whaleNet / whaleTotal) * 100;
+    const retailPct = (retailNet / retailTotal) * 100;
+
+    return whalePct - retailPct;
+};
+
 const ContractDetail: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const [data, setData] = useState<ContractHistory | null>(null);
+    const { id: contractId } = useParams<{ id: string }>();
+    const [data, setData] = useState<ContractBasicDetail | null>(null);
+    const [historyData, setHistoryData] = useState<ContractHistoryData | null>(null);
+    const [allContracts, setAllContracts] = useState<{ id: number; contract_name: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchContractHistory = async () => {
+        const fetchCriticalData = async () => {
+            if (!contractId) return;
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:8000/api/v1/contracts/${id}/history`);
-                if (!response.ok) throw new Error('Failed to fetch contract history');
-                const result = await response.json();
-                setData(result);
+                setError(null);
+
+                // 1. Fetch All Contracts (for correlation selector)
+                const contractsRes = await fetch('http://localhost:8000/api/v1/contracts/');
+                if (contractsRes.ok) {
+                    const contracts = await contractsRes.json();
+                    setAllContracts(contracts.map((c: any) => ({ id: c.id, contract_name: c.contract_name })));
+                }
+
+                // 2. Fetch Contract Detail
+                const detailRes = await fetch(`http://localhost:8000/api/v1/contracts/${contractId}`);
+                if (!detailRes.ok) throw new Error('Failed to fetch contract detail');
+                const detail: ContractBasicDetail = await detailRes.json();
+                setData(detail);
+
+                // 3. Fetch History
+                const historyRes = await fetch(`http://localhost:8000/api/v1/contracts/${contractId}/history?weeks_back=500`);
+                if (!historyRes.ok) throw new Error('Failed to fetch contract history');
+                const history: ContractHistoryData = await historyRes.json();
+                setHistoryData(history);
+
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Unknown error');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (id) {
-            fetchContractHistory();
-        }
-    }, [id]);
+        fetchCriticalData();
+    }, [contractId]);
 
     if (loading) {
         return (
@@ -83,7 +139,7 @@ const ContractDetail: React.FC = () => {
         );
     }
 
-    if (error || !data) {
+    if (error || !data || !historyData) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
@@ -95,14 +151,14 @@ const ContractDetail: React.FC = () => {
     }
 
     // Prepare chart data (reverse to show chronologically)
-    const chartData = [...data.historical_reports].reverse().map(report => ({
+    const chartData = [...historyData.historical_reports].reverse().map(report => ({
         date: new Date(report.report_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         dealer: report.dealer_net,
         assetMgr: report.asset_mgr_net,
         leveraged: report.lev_net,
     }));
 
-    const priceData = [...data.price_history].reverse().map(price => ({
+    const priceData = [...historyData.price_history].reverse().map(price => ({
         date: new Date(price.report_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         price: price.close_price,
         vwap: price.reporting_vwap,
@@ -131,7 +187,7 @@ const ContractDetail: React.FC = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Alerts</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{data.historical_alerts.length}</p>
+                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{historyData.historical_alerts.length}</p>
                             </div>
                             <Activity className="text-blue-500" size={32} />
                         </div>
@@ -141,7 +197,7 @@ const ContractDetail: React.FC = () => {
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">High Alerts</p>
                                 <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                                    {data.historical_alerts.filter(a => a.alert_level === 'High').length}
+                                    {historyData.historical_alerts.filter(a => a.alert_level === 'High').length}
                                 </p>
                             </div>
                             <TrendingUp className="text-red-500" size={32} />
@@ -151,7 +207,7 @@ const ContractDetail: React.FC = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Data Points</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{data.historical_reports.length}</p>
+                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{historyData.historical_reports.length}</p>
                             </div>
                             <TrendingDown className="text-green-500" size={32} />
                         </div>
@@ -267,7 +323,7 @@ const ContractDetail: React.FC = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase text-gray-500 dark:text-gray-300">
-                                <tr>
+                                <tr key="header-row">
                                     <th className="px-6 py-4">Date</th>
                                     <th className="px-6 py-4">Level</th>
                                     <th className="px-6 py-4">Z-Score</th>
@@ -276,7 +332,7 @@ const ContractDetail: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-white/5">
-                                {data.historical_alerts.slice(0, 10).map((alert) => (
+                                {historyData.historical_alerts.slice(0, 10).map((alert) => (
                                     <tr key={alert.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
                                         <td className="px-6 py-4 text-gray-900 dark:text-white">
                                             {new Date(alert.report_date).toLocaleDateString('it-IT')}
@@ -305,18 +361,38 @@ const ContractDetail: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Price Correlation Chart */}
-                <PriceCorrelationChart
-                    reports={data.historical_reports}
-                    prices={data.price_history}
+                {/* Advanced Price & COT Analysis */}
+                <AdvancedPriceChart
+                    reports={historyData.historical_reports}
+                    prices={historyData.price_history}
                     contractName={data.contract_name}
+                    currentContractId={data.id}
+                    allContracts={allContracts}
                 />
 
                 {/* Seasonality Chart */}
-                <SeasonalityChart contractId={data.contract_id} />
+                <SeasonalityChart contractId={data.id} />
+
+                {/* Sentiment Gap Analysis */}
+                <SentimentGauge reports={historyData.historical_reports} />
+
+                {/* Sentiment Gap Historical Chart */}
+                <SentimentGapHistoryChart reports={historyData.historical_reports} />
+
+                {/* Historical Edge Backtest */}
+                <HistoricalEdge
+                    contractId={data.id}
+                    currentSentimentGap={historyData.historical_reports.length > 0 ? calculateSentimentGap(historyData.historical_reports[0]) : undefined}
+                />
+
+                {/* COT Index Oscillator */}
+                <COTOscillator reports={historyData.historical_reports} />
+
+                {/* Price Distance from VWAP */}
+                <PriceDistanceIndicator priceHistory={historyData.price_history} />
 
                 {/* Full Historical Reports */}
-                <FullReportsTable contractId={data.contract_id} />
+                <FullReportsTable contractId={data.id} />
             </div>
         </div>
     );
