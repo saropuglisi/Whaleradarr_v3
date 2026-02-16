@@ -1,5 +1,7 @@
-import React from 'react';
-import { ArrowUpRight, ArrowDownRight, Activity, BarChart2, ShieldCheck, TrendingUp, Clock, Minus, TrendingDown } from 'lucide-react';
+import {
+    Activity, BarChart2, ShieldCheck,
+    TrendingUp, Clock, Users, History, Maximize
+} from 'lucide-react';
 
 const Help: React.FC = () => {
     return (
@@ -10,7 +12,7 @@ const Help: React.FC = () => {
                     Understanding Whaleradarr
                 </h1>
                 <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    A guide to interpreting Institutional Order Flow, Z-Scores, and the metrics used in our analysis engine.
+                    A guide to interpreting Institutional Order Flow, Sentiment Divergences, and the risk metrics used in our analysis engine.
                 </p>
             </div>
 
@@ -18,7 +20,7 @@ const Help: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 {/* Z-Score */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-blue-500/30 transition-colors">
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-blue-500/30 transition-colors shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-3 rounded-lg bg-blue-500/20 text-blue-500">
                             <BarChart2 size={24} />
@@ -31,7 +33,7 @@ const Help: React.FC = () => {
                     <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
                         <li className="flex items-start gap-2">
                             <span className="font-mono text-green-500 font-bold">&gt; 2.0</span>
-                            <span>Extremely Bullish (Top 2% of history)</span>
+                            <span>Extremely Bullish (Top 2.5% of history)</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="font-mono text-blue-500 font-bold">0.0</span>
@@ -39,13 +41,13 @@ const Help: React.FC = () => {
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="font-mono text-red-500 font-bold">&lt; -2.0</span>
-                            <span>Extremely Bearish (Bottom 2% of history)</span>
+                            <span>Extremely Bearish (Bottom 2.5% of history)</span>
                         </li>
                     </ul>
                 </div>
 
                 {/* COT Index */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-emerald-500/30 transition-colors">
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-emerald-500/30 transition-colors shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-3 rounded-lg bg-emerald-500/20 text-emerald-500">
                             <TrendingUp size={24} />
@@ -53,139 +55,172 @@ const Help: React.FC = () => {
                         <h2 className="text-2xl font-bold">COT Index (0-100)</h2>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        A percentile ranking of the current net position against the all-time range.
+                        A percentile ranking of the current net position against the specified historical range (e.g. 3 years).
                     </p>
                     <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
                         <li className="flex items-start gap-2">
                             <span className="font-mono text-green-500 font-bold">100%</span>
-                            <span>Institutions are maximally Long</span>
+                            <span>Institutions are at their maximally Long net position</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="font-mono text-yellow-500 font-bold">50%</span>
-                            <span>Neutral</span>
+                            <span>Neutral / Middle of the historical range</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="font-mono text-red-500 font-bold">0%</span>
-                            <span>Institutions are maximally Short</span>
+                            <span>Institutions are at their maximally Short net position</span>
                         </li>
                     </ul>
                 </div>
 
-                {/* Price Context (VWAP) */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-purple-500/30 transition-colors">
+                {/* Sentiment Gap & Convergence */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-purple-500/30 transition-colors shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-3 rounded-lg bg-purple-500/20 text-purple-500">
-                            <Activity size={24} />
+                            <Users size={24} />
                         </div>
-                        <h2 className="text-2xl font-bold">VWAP Context</h2>
+                        <h2 className="text-2xl font-bold">Sentiment Analysis</h2>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        We compare the closing price to the Weekly VWAP (Volume Weighted Average Price) to confirm the trend strength.
+                        Tracking the divergence between the "Smart Money" (Whales) and Retail speculators.
+                    </p>
+                    <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
+                        <li className="flex flex-col gap-1">
+                            <span className="font-bold text-gray-700 dark:text-gray-200">Whale/Retail Gap</span>
+                            <span>Calculated as (Asset Mgr % Long) - (Retail % Long). A gap &gt; 30% indicates significant divergence.</span>
+                        </li>
+                        <li className="flex flex-col gap-1">
+                            <span className="font-bold text-gray-700 dark:text-gray-200">Institutional Convergence</span>
+                            <span>When both <b>Asset Managers</b> and <b>Leveraged Funds</b> are positioned on the same side, signal confidence increases.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Price Distance & Risk */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-orange-500/30 transition-colors shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-3 rounded-lg bg-orange-500/20 text-orange-500">
+                            <Maximize size={24} />
+                        </div>
+                        <h2 className="text-2xl font-bold">Price Distance (Risk)</h2>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                        Measures how far the price has deviated from the institutional average (VWAP), adjusted for volatility.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
                         <li className="flex items-start gap-2">
-                            <div className="flex items-center gap-1 text-green-400 font-bold min-w-[80px]">
-                                Markup <ArrowUpRight size={14} />
-                            </div>
-                            <span>Price &gt; VWAP (Buyers in control)</span>
+                            <span className="font-bold text-green-500">Safe (&lt; 1&sigma;)</span>
+                            <span>Optimal entry zone; price is near institutional value.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <div className="flex items-center gap-1 text-red-400 font-bold min-w-[80px]">
-                                Markdown <ArrowDownRight size={14} />
-                            </div>
-                            <span>Price &lt; VWAP (Sellers in control)</span>
+                            <span className="font-bold text-yellow-500">Extended (&gt; 1&sigma;)</span>
+                            <span>Caution recommended; risk of a mean-reversion pull-back.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="font-bold text-red-500">Danger (&gt; 2&sigma;)</span>
+                            <span>Overextended; extreme risk of retracement. Avoid chasing.</span>
                         </li>
                     </ul>
                 </div>
 
-
-                {/* Weekly Changes & Position Flow */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-pink-500/30 transition-colors">
+                {/* Historical Edge */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-pink-500/30 transition-colors shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-3 rounded-lg bg-pink-500/20 text-pink-500">
+                            <History size={24} />
+                        </div>
+                        <h2 className="text-2xl font-bold">Historical Edge</h2>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                        Real-time backtest engine that calculates the statistical probability of a signal based on last 5 years of data.
+                    </p>
+                    <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
+                        <li className="flex flex-col gap-1">
+                            <span className="font-bold text-gray-700 dark:text-gray-200">Win Rate</span>
+                            <span>The % of times price moved in the signal direction over the following 4 weeks.</span>
+                        </li>
+                        <li className="flex flex-col gap-1">
+                            <span className="font-bold text-gray-700 dark:text-gray-200">Sample Size</span>
+                            <span>The number of times this specific sentiment threshold was triggered in history.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Weekly Changes & Position Flow */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-emerald-500/30 transition-colors shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-3 rounded-lg bg-emerald-500/20 text-emerald-500">
                             <Activity size={24} />
                         </div>
                         <h2 className="text-2xl font-bold">Weekly Position Flow</h2>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        We track the WoW (Week-over-Week) change in positions for key market participants to spot momentum shifts.
+                        Tracks the Week-over-Week (WoW) change in positions for key market participants.
                     </p>
                     <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
                         <li className="flex flex-col gap-1">
-                            <span className="font-bold text-gray-700 dark:text-gray-200">Z-Score Delta</span>
-                            <span>The change in Z-Score from the previous week. <span className="text-green-500">(+0.5)</span> indicates strengthening bullishness, while <span className="text-red-500">(-0.5)</span> indicates weakening.</span>
+                            <span className="font-bold text-gray-700 dark:text-gray-200">Asset Managers (Whales)</span>
+                            <span>Pension Funds and Sovereign Wealth. Represent long-term strategic value.</span>
                         </li>
                         <li className="flex flex-col gap-1">
-                            <span className="font-bold text-gray-700 dark:text-gray-200">Dealer / Intermediary</span>
-                            <span>Banks and market makers. They usually take the other side of the trade (Hedging).</span>
+                            <span className="font-bold text-gray-700 dark:text-gray-200">Leveraged Funds (Speculators)</span>
+                            <span>Hedge Funds and CTA's. Fast money that often drives short-term trends.</span>
                         </li>
                         <li className="flex flex-col gap-1">
-                            <span className="font-bold text-gray-700 dark:text-gray-200">Asset Manager</span>
-                            <span>Institutional investors (Pension Funds, Insurance). Slow moving, trend following money.</span>
-                        </li>
-                        <li className="flex flex-col gap-1">
-                            <span className="font-bold text-gray-700 dark:text-gray-200">Leveraged Funds</span>
-                            <span>Hedge Funds and Speculators. Fast moving, often chasing trends or reversing quickly.</span>
+                            <span className="font-bold text-gray-700 dark:text-gray-200">Non-Reportable (Retail)</span>
+                            <span>Small speculators. Often used as a contrarian indicator at extremes.</span>
                         </li>
                     </ul>
                 </div>
 
                 {/* Alert Confidence */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-orange-500/30 transition-colors">
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-amber-500/30 transition-colors shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-3 rounded-lg bg-orange-500/20 text-orange-500">
+                        <div className="p-3 rounded-lg bg-amber-500/20 text-amber-500">
                             <ShieldCheck size={24} />
                         </div>
                         <h2 className="text-2xl font-bold">Confidence Score</h2>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        A proprietary algorithm that combines Z-Score, COT Index, and Price Context to gauge the reliability of a signal.
+                        A proprietary algorithm that combines Z-Score, COT Index, Sentiment Gap, and Price Context.
                     </p>
-                    <div className="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-4">
-                        <div className="absolute top-0 left-0 h-full w-1/3 bg-red-500"></div>
-                        <div className="absolute top-0 left-1/3 h-full w-1/3 bg-yellow-500"></div>
-                        <div className="absolute top-0 left-2/3 h-full w-1/3 bg-green-500"></div>
+                    <div className="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-4 shadow-inner">
+                        <div className="absolute top-0 left-0 h-full w-1/3 bg-red-500 opacity-80"></div>
+                        <div className="absolute top-0 left-1/3 h-full w-1/3 bg-yellow-500 opacity-80"></div>
+                        <div className="absolute top-0 left-2/3 h-full w-1/3 bg-green-500 opacity-80"></div>
                     </div>
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>Low (&lt;50)</span>
-                        <span>Medium (50-80)</span>
-                        <span>High (&gt;80)</span>
+                        <span>Low (&lt;40)</span>
+                        <span>Mid (40-75)</span>
+                        <span>High (&gt;75)</span>
                     </div>
                 </div>
 
-                {/* Execution Timing (Technical Sentiment) */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-blue-500/30 transition-colors">
+                {/* Execution Timing */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-8 space-y-4 hover:border-indigo-500/30 transition-colors shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-3 rounded-lg bg-blue-500/20 text-blue-500">
+                        <div className="p-3 rounded-lg bg-indigo-500/20 text-indigo-500">
                             <Clock size={24} />
                         </div>
                         <h2 className="text-2xl font-bold">Execution Timing</h2>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        Technical sentiment signals that identify high-probability entry and exit zones using Daily Price Data (RSI, EMA, and Trend).
+                        Technical sentiment signals that identify entry/exit zones using RSI, EMAs, and Trend momentum.
                     </p>
                     <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-black/20 p-4 rounded-lg">
                         <li className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                                 <span className="px-2 py-0.5 rounded bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 font-bold">Entry Zone</span>
-                                <span className="text-xs text-gray-400">(Oversold + Bullish Trend)</span>
+                                <span className="text-xs text-gray-400">(Bullish Trend + Value)</span>
                             </div>
-                            <span>Best time to buy. RSI is low (&lt;30) and the price is above long-term EMAs (EMA 50 &gt; EMA 200).</span>
+                            <span>Price is above long-term EMAs while technical oscillators indicate a return to value.</span>
                         </li>
                         <li className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                                 <span className="px-2 py-0.5 rounded bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 font-bold">Exit Zone</span>
-                                <span className="text-xs text-gray-400">(Overbought + Bearish Trend)</span>
+                                <span className="text-xs text-gray-400">(Exhaustion Signal)</span>
                             </div>
-                            <span>Potential trend exhaustion. RSI is high (&gt;70) while the price remains in a bearish structure.</span>
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-400">
-                            <TrendingUp size={14} className="text-green-400" />
-                            <span>Trend tracking: Bullish (Price &gt; EMA 50 &gt; EMA 200)</span>
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-400">
-                            <TrendingDown size={14} className="text-red-400" />
-                            <span>Trend tracking: Bearish (Price &lt; EMA 50 &lt; EMA 200)</span>
+                            <span>Positions are at extremes and technical momentum is starting to rollover.</span>
                         </li>
                     </ul>
                 </div>
