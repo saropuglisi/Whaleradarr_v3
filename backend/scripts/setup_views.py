@@ -11,12 +11,12 @@ from app.db.session import SessionLocal
 def create_views():
     db = SessionLocal()
     try:
-        logger.info("Creating Optimized SQL Views with Ratios and Changes...")
+        logger.info("Creating Optimized SQL Views with Ratios, Changes and OHLC Prices...")
         
         db.execute(text("DROP VIEW IF EXISTS v_weekly_report_changes CASCADE;"))
         db.commit()
 
-        # Vista ottimizzata completa
+        # Vista ottimizzata completa con Prezzi
         view_sql = """
         CREATE VIEW v_weekly_report_changes AS
         SELECT 
@@ -24,6 +24,13 @@ def create_views():
             c.contract_name,
             r.report_date,
             
+            -- PREZZI (Tuesday OHLC)
+            p.open_price,
+            p.high_price,
+            p.low_price,
+            p.close_price,
+            p.volume as market_volume,
+
             -- 1. DEALER
             r.dealer_net,
             (r.dealer_long_chg - r.dealer_short_chg) as dealer_net_change,
@@ -56,12 +63,13 @@ def create_views():
             r.open_interest_chg as oi_change
 
         FROM weekly_reports r
-        JOIN contracts c ON r.contract_id = c.id;
+        JOIN contracts c ON r.contract_id = c.id
+        LEFT JOIN weekly_prices p ON (r.contract_id = p.contract_id AND r.report_date = p.report_date);
         """
         
         db.execute(text(view_sql))
         db.commit()
-        logger.success("Optimized View 'v_weekly_report_changes' created with all metrics.")
+        logger.success("Optimized View 'v_weekly_report_changes' created with Integrated Price Data.")
 
     except Exception as e:
         logger.error(f"Failed to update view: {e}")

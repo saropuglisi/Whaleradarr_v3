@@ -14,6 +14,7 @@ from app.models.contract import Contract
 from app.models.report import WeeklyReport
 from app.models.price import WeeklyPrice
 from app.models.alert import WhaleAlert
+from app.models.statistics import ContractStatistics
 from app.services.data.cftc_ingestor import CFTCIngestor
 from app.services.data.cot_loader import COTLoaderService
 
