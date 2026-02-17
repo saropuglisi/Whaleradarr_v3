@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowRight, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, TrendingUp, TrendingDown, Minus, AlertTriangle, Info } from 'lucide-react';
 
 interface SentimentGaugeProps {
     reports: {
@@ -16,6 +16,7 @@ interface SentimentGaugeProps {
 }
 
 const SentimentGauge: React.FC<SentimentGaugeProps> = ({ reports }) => {
+    const [showGlossary, setShowGlossary] = useState(false);
     if (!reports || reports.length === 0) return null;
 
     // Use latest report
@@ -94,9 +95,17 @@ const SentimentGauge: React.FC<SentimentGaugeProps> = ({ reports }) => {
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-6">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        Sentiment Gap
-                    </h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            Sentiment Gap
+                        </h3>
+                        <button
+                            onClick={() => setShowGlossary(!showGlossary)}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Smart Money (Whales) vs. Retail (Small Specs) positioning.
                     </p>
@@ -162,6 +171,31 @@ const SentimentGauge: React.FC<SentimentGaugeProps> = ({ reports }) => {
                     )}
                 </div>
             </div>
+
+            {/* Glossary Section */}
+            {showGlossary && (
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Sentiment Glossary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                            <span className="font-bold text-green-500">Whales (Asset Mgr):</span>
+                            <p className="text-xs mt-1 leading-relaxed">Institutional money (Pension Funds, Endowments). They tend to be "Right" in the long term and accumulate early.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-blue-400">Retail (Non-Rep):</span>
+                            <p className="text-xs mt-1 leading-relaxed">Small speculators. They are often "Wrong" at market extremes, buying tops and selling bottoms.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-purple-500">Sentiment Gap:</span>
+                            <p className="text-xs mt-1 leading-relaxed">The difference between Whale % Long and Retail % Long. A positive gap means Whales are more bullish.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Trend Following:</span>
+                            <p className="text-xs mt-1 leading-relaxed">We want to follow the Whales. If they are Buying and Retail is Selling, that is a bullish signal.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

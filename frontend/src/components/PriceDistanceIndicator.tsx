@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
 
 interface PriceHistory {
     report_date: string;
@@ -12,6 +12,7 @@ interface PriceDistanceIndicatorProps {
 }
 
 const PriceDistanceIndicator: React.FC<PriceDistanceIndicatorProps> = ({ priceHistory }) => {
+    const [showGlossary, setShowGlossary] = useState(false);
     const analysis = useMemo(() => {
         if (!priceHistory || priceHistory.length < 20) {
             return null;
@@ -104,6 +105,12 @@ const PriceDistanceIndicator: React.FC<PriceDistanceIndicatorProps> = ({ priceHi
                 <div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         Price Distance from VWAP
+                        <button
+                            onClick={() => setShowGlossary(!showGlossary)}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
                         <RiskIcon size={20} className={colors.text} />
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -179,6 +186,23 @@ const PriceDistanceIndicator: React.FC<PriceDistanceIndicatorProps> = ({ priceHi
                     )}
                 </p>
             </div>
+
+            {/* Glossary Section */}
+            {showGlossary && (
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Price Distance Glossary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">VWAP:</span>
+                            <p className="text-xs mt-1 leading-relaxed">Volume Weighted Average Price. The "fair value" benchmark institutions use.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Z-Score (σ):</span>
+                            <p className="text-xs mt-1 leading-relaxed">How many standard deviations price is from VWAP. &gt;2σ is considered statistically overextended.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

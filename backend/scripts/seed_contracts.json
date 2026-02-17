@@ -133,5 +133,320 @@
     "exchange": "CBOT",
     "expiry_rule": "last_business_day",
     "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "092741",
+    "contract_name": "SWISS FRANC",
+    "market_category": "currency",
+    "yahoo_ticker": "6S=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 125000
+  },
+  {
+    "cftc_contract_code": "112741",
+    "contract_name": "NZ DOLLAR",
+    "market_category": "currency",
+    "yahoo_ticker": "6N=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 100000
+  },
+  {
+    "cftc_contract_code": "098662",
+    "contract_name": "US DOLLAR INDEX",
+    "market_category": "currency",
+    "yahoo_ticker": "DX=F",
+    "exchange": "ICE",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "095741",
+    "contract_name": "MEXICAN PESO",
+    "market_category": "currency",
+    "yahoo_ticker": "6M=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 500000
+  },
+  {
+    "cftc_contract_code": "102741",
+    "contract_name": "BRAZILIAN REAL",
+    "market_category": "currency",
+    "yahoo_ticker": "6L=F",
+    "exchange": "CME",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 100000
+  },
+  {
+    "cftc_contract_code": "209742",
+    "contract_name": "NASDAQ 100 E-MINI",
+    "market_category": "stock_index",
+    "yahoo_ticker": "NQ=F",
+    "exchange": "CME",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 20
+  },
+  {
+    "cftc_contract_code": "12460+",
+    "contract_name": "DOW JONES E-MINI",
+    "market_category": "stock_index",
+    "yahoo_ticker": "YM=F",
+    "exchange": "CBOT",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 5
+  },
+  {
+    "cftc_contract_code": "239742",
+    "contract_name": "RUSSELL 2000 E-MINI",
+    "market_category": "stock_index",
+    "yahoo_ticker": "RTY=F",
+    "exchange": "CME",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 50
+  },
+  {
+    "cftc_contract_code": "33874+",
+    "contract_name": "S&P MIDCAP 400",
+    "market_category": "stock_index",
+    "yahoo_ticker": "EMD=F",
+    "exchange": "CME",
+    "expiry_rule": "third_friday",
+    "contract_unit_value": 100
+  },
+  {
+    "cftc_contract_code": "1170E1",
+    "contract_name": "VIX FUTURES",
+    "market_category": "stock_index",
+    "yahoo_ticker": "VX=F",
+    "exchange": "CFE",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "240743",
+    "contract_name": "NIKKEI 225 (USD)",
+    "market_category": "stock_index",
+    "yahoo_ticker": "NKD=F",
+    "exchange": "CME",
+    "expiry_rule": "second_friday",
+    "contract_unit_value": 5
+  },
+  {
+    "cftc_contract_code": "020601",
+    "contract_name": "30-YEAR T-BOND",
+    "market_category": "interest_rate",
+    "yahoo_ticker": "ZB=F",
+    "exchange": "CBOT",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "044601",
+    "contract_name": "5-YEAR T-NOTE",
+    "market_category": "interest_rate",
+    "yahoo_ticker": "ZF=F",
+    "exchange": "CBOT",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "042601",
+    "contract_name": "2-YEAR T-NOTE",
+    "market_category": "interest_rate",
+    "yahoo_ticker": "ZT=F",
+    "exchange": "CBOT",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 2000
+  },
+  {
+    "cftc_contract_code": "134741",
+    "contract_name": "3-MONTH SOFR",
+    "market_category": "interest_rate",
+    "yahoo_ticker": "SR3=F",
+    "exchange": "CME",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 2500
+  },
+  {
+    "cftc_contract_code": "045601",
+    "contract_name": "30-DAY FED FUNDS",
+    "market_category": "interest_rate",
+    "yahoo_ticker": "ZQ=F",
+    "exchange": "CBOT",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 4167
+  },
+  {
+    "cftc_contract_code": "020604",
+    "contract_name": "ULTRA T-BOND",
+    "market_category": "interest_rate",
+    "yahoo_ticker": "UB=F",
+    "exchange": "CBOT",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "075651",
+    "contract_name": "PALLADIUM",
+    "market_category": "metal",
+    "yahoo_ticker": "PA=F",
+    "exchange": "NYMEX",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 100
+  },
+  {
+    "cftc_contract_code": "076651",
+    "contract_name": "PLATINUM",
+    "market_category": "metal",
+    "yahoo_ticker": "PL=F",
+    "exchange": "NYMEX",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 50
+  },
+  {
+    "cftc_contract_code": "191691",
+    "contract_name": "ALUMINUM",
+    "market_category": "metal",
+    "yahoo_ticker": "ALI=F",
+    "exchange": "COMEX",
+    "expiry_rule": "third_wednesday",
+    "contract_unit_value": 25000
+  },
+  {
+    "cftc_contract_code": "022651",
+    "contract_name": "HEATING OIL",
+    "market_category": "energy",
+    "yahoo_ticker": "HO=F",
+    "exchange": "NYMEX",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 42000
+  },
+  {
+    "cftc_contract_code": "111659",
+    "contract_name": "RBOB GASOLINE",
+    "market_category": "energy",
+    "yahoo_ticker": "RB=F",
+    "exchange": "NYMEX",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 42000
+  },
+  {
+    "cftc_contract_code": "06765T",
+    "contract_name": "BRENT CRUDE",
+    "market_category": "energy",
+    "yahoo_ticker": "BZ=F",
+    "exchange": "ICE",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 1000
+  },
+  {
+    "cftc_contract_code": "002602",
+    "contract_name": "CORN",
+    "market_category": "agricultural",
+    "yahoo_ticker": "ZC=F",
+    "exchange": "CBOT",
+    "expiry_rule": "custom",
+    "contract_unit_value": 50
+  },
+  {
+    "cftc_contract_code": "005602",
+    "contract_name": "SOYBEANS",
+    "market_category": "agricultural",
+    "yahoo_ticker": "ZS=F",
+    "exchange": "CBOT",
+    "expiry_rule": "custom",
+    "contract_unit_value": 50
+  },
+  {
+    "cftc_contract_code": "001602",
+    "contract_name": "WHEAT",
+    "market_category": "agricultural",
+    "yahoo_ticker": "ZW=F",
+    "exchange": "CBOT",
+    "expiry_rule": "custom",
+    "contract_unit_value": 50
+  },
+  {
+    "cftc_contract_code": "080732",
+    "contract_name": "SUGAR #11",
+    "market_category": "agricultural",
+    "yahoo_ticker": "SB=F",
+    "exchange": "ICE",
+    "expiry_rule": "custom",
+    "contract_unit_value": 1120
+  },
+  {
+    "cftc_contract_code": "083731",
+    "contract_name": "COFFEE C",
+    "market_category": "agricultural",
+    "yahoo_ticker": "KC=F",
+    "exchange": "ICE",
+    "expiry_rule": "custom",
+    "contract_unit_value": 375
+  },
+  {
+    "cftc_contract_code": "033661",
+    "contract_name": "COTTON #2",
+    "market_category": "agricultural",
+    "yahoo_ticker": "CT=F",
+    "exchange": "ICE",
+    "expiry_rule": "custom",
+    "contract_unit_value": 500
+  },
+  {
+    "cftc_contract_code": "073732",
+    "contract_name": "COCOA",
+    "market_category": "agricultural",
+    "yahoo_ticker": "CC=F",
+    "exchange": "ICE",
+    "expiry_rule": "custom",
+    "contract_unit_value": 10
+  },
+  {
+    "cftc_contract_code": "007601",
+    "contract_name": "SOYBEAN OIL",
+    "market_category": "agricultural",
+    "yahoo_ticker": "ZL=F",
+    "exchange": "CBOT",
+    "expiry_rule": "custom",
+    "contract_unit_value": 600
+  },
+  {
+    "cftc_contract_code": "026603",
+    "contract_name": "SOYBEAN MEAL",
+    "market_category": "agricultural",
+    "yahoo_ticker": "ZM=F",
+    "exchange": "CBOT",
+    "expiry_rule": "custom",
+    "contract_unit_value": 100
+  },
+  {
+    "cftc_contract_code": "057642",
+    "contract_name": "LIVE CATTLE",
+    "market_category": "livestock",
+    "yahoo_ticker": "LE=F",
+    "exchange": "CME",
+    "expiry_rule": "last_business_day",
+    "contract_unit_value": 400
+  },
+  {
+    "cftc_contract_code": "054642",
+    "contract_name": "LEAN HOGS",
+    "market_category": "livestock",
+    "yahoo_ticker": "HE=F",
+    "exchange": "CME",
+    "expiry_rule": "tenth_business_day",
+    "contract_unit_value": 400
+  },
+  {
+    "cftc_contract_code": "061641",
+    "contract_name": "FEEDER CATTLE",
+    "market_category": "livestock",
+    "yahoo_ticker": "GF=F",
+    "exchange": "CME",
+    "expiry_rule": "last_thursday",
+    "contract_unit_value": 500
   }
 ]

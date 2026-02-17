@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from app.db.session import SessionLocal
 from app.models.contract import Contract
 from app.models.report import WeeklyReport
-from app.models.report import WeeklyReport
+from app.services.analysis.cot_staleness import COTStalenessService
 
 router = APIRouter()
 
@@ -142,7 +142,27 @@ def get_market_heatmap(
             "data": series
         })
         
+
     return {
         "weeks": week_dates,
         "heatmap": heatmap_data
     }
+
+@router.get("/staleness/{contract_id}")
+def get_cot_staleness(
+    contract_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Get COT Staleness Confidence Score for a specific contract.
+    Calculates reliability based on price movement since last report.
+    """
+    service = COTStalenessService(db)
+    result = service.calculate_score(contract_id)
+    
+    if "error" in result:
+        # If contract not found, 404. Otherwise return result with error for frontend handling
+        if "Contract not found" in result["error"]:
+            raise HTTPException(status_code=404, detail=result["error"])
+    
+    return result

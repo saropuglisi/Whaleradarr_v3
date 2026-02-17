@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TrendingUp, BarChart3, AlertCircle } from 'lucide-react';
+import { TrendingUp, BarChart3, AlertCircle, Info } from 'lucide-react';
 
 interface EdgeAnalysis {
     threshold: number;
@@ -24,6 +24,7 @@ const HistoricalEdge: React.FC<HistoricalEdgeProps> = ({ contractId, currentSent
     const [data, setData] = useState<EdgeAnalysis[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showGlossary, setShowGlossary] = useState(false);
 
     useEffect(() => {
         const fetchEdgeData = async () => {
@@ -73,10 +74,18 @@ const HistoricalEdge: React.FC<HistoricalEdgeProps> = ({ contractId, currentSent
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-6">
             <div className="flex items-start justify-between mb-6">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <BarChart3 size={24} className="text-blue-500" />
-                        Historical Edge
-                    </h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <BarChart3 size={24} className="text-blue-500" />
+                            Historical Edge
+                        </h3>
+                        <button
+                            onClick={() => setShowGlossary(!showGlossary)}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Backtest results for sentiment gap signals (Last 5 years)
                     </p>
@@ -120,8 +129,8 @@ const HistoricalEdge: React.FC<HistoricalEdgeProps> = ({ contractId, currentSent
                         <div
                             key={analysis.threshold}
                             className={`p-4 rounded-lg border-2 transition-all ${isActive
-                                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                                    : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10'
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
+                                : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10'
                                 }`}
                         >
                             <div className="text-center mb-3">
@@ -173,6 +182,23 @@ const HistoricalEdge: React.FC<HistoricalEdgeProps> = ({ contractId, currentSent
                     Use this to validate current signals against historical performance.
                 </p>
             </div>
+
+            {/* Glossary Section */}
+            {showGlossary && (
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Edge Glossary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Win Rate:</span>
+                            <p className="text-xs mt-1 leading-relaxed">Percentage of times the price moved in the expected direction after a signal.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Sample Size:</span>
+                            <p className="text-xs mt-1 leading-relaxed">Number of times this signal (e.g. Gap &gt; 20%) occurred in the last 5 years.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import SeasonalityChart from '../components/SeasonalityChart';
 import FullReportsTable from '../components/FullReportsTable';
@@ -10,6 +10,8 @@ import SentimentGapHistoryChart from '../components/SentimentGapHistoryChart';
 import COTOscillator from '../components/COTOscillator';
 import PriceDistanceIndicator from '../components/PriceDistanceIndicator';
 import HistoricalEdge from '../components/HistoricalEdge';
+import COTStalenessIndicator from '../components/COTStalenessIndicator';
+import SmartSignalCard from '../components/SmartSignalCard';
 
 
 interface HistoricalReport {
@@ -47,10 +49,7 @@ interface PriceHistory {
     reporting_vwap?: number;
 }
 
-interface ContractHistory {
-    contract_id: number;
-    contract_name: string;
-}
+
 
 interface ContractBasicDetail {
     id: number;
@@ -91,6 +90,8 @@ const ContractDetail: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const [stalenessData, setStalenessData] = useState<any>(null);
+
     useEffect(() => {
         const fetchCriticalData = async () => {
             if (!contractId) return;
@@ -116,6 +117,13 @@ const ContractDetail: React.FC = () => {
                 if (!historyRes.ok) throw new Error('Failed to fetch contract history');
                 const history: ContractHistoryData = await historyRes.json();
                 setHistoryData(history);
+
+                // 4. Fetch Staleness Data (New)
+                const stalenessRes = await fetch(`http://localhost:8000/api/v1/analysis/staleness/${contractId}`);
+                if (stalenessRes.ok) {
+                    const staleness = await stalenessRes.json();
+                    setStalenessData(staleness);
+                }
 
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Unknown error');
@@ -181,38 +189,265 @@ const ContractDetail: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white dark:bg-black/40 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/10 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Alerts</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{historyData.historical_alerts.length}</p>
+                {/* Smart Signal Indicator */}
+                {historyData && (
+                    <SmartSignalCard
+                        reports={historyData.historical_reports}
+                        alerts={historyData.historical_alerts}
+                        priceHistory={historyData.price_history}
+                        stalenessData={stalenessData}
+                    />
+                )}
+
+                {/* Market Context Header - Premium Style */}
+                <div className="relative group overflow-hidden bg-white/90 dark:bg-[#0A0A0A]/90 backdrop-blur-2xl rounded-3xl border border-gray-200/50 dark:border-white/10 p-8 mb-10 shadow-2xl shadow-gray-200/50 dark:shadow-black/50 transition-all hover:border-gray-300 dark:hover:border-white/20">
+
+                    {/* Subtle Background Gradients */}
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/5 blur-[100px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/2"></div>
+
+                    <div className="relative z-10 flex flex-col md:flex-row items-stretch justify-between gap-8 md:gap-12">
+
+                        {/* 1. Price & Ticker Section */}
+                        <div className="flex flex-col justify-center">
+                            <div className="flex items-baseline gap-1 mb-1">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Current Price</span>
                             </div>
-                            <Activity className="text-blue-500" size={32} />
+                            <div className="flex items-baseline gap-4">
+                                <span className="text-4xl font-bold text-gray-900 dark:text-white tracking-tighter drop-shadow-sm">
+                                    {historyData.price_history.length > 0
+                                        ? historyData.price_history[0].close_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                        : 'N/A'}
+                                </span>
+                                {historyData.price_history.length > 1 && (
+                                    (() => {
+                                        const current = historyData.price_history[0].close_price;
+                                        const prev = historyData.price_history[1].close_price;
+                                        const change = current - prev;
+                                        const pct = (change / prev) * 100;
+                                        const isUp = change >= 0;
+
+                                        return (
+                                            <div className="flex flex-col items-start -translate-y-1">
+                                                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${isUp ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
+                                                    <span className="text-lg font-bold tracking-tight leading-none">
+                                                        {isUp ? '+' : ''}{change.toFixed(2)}
+                                                    </span>
+                                                    <span className="text-xs font-bold opacity-80 leading-none">
+                                                        ({isUp ? '+' : ''}{pct.toFixed(2)}%)
+                                                    </span>
+                                                </div>
+
+                                                {/* Price Change since Last COT */}
+                                                {(() => {
+                                                    if (historyData.historical_reports.length === 0) return null;
+                                                    const reportDate = new Date(historyData.historical_reports[0].report_date).toDateString();
+                                                    const cotPriceEntry = historyData.price_history.find(p =>
+                                                        new Date(p.report_date).toDateString() === reportDate
+                                                    );
+
+                                                    if (cotPriceEntry) {
+                                                        const cotPrice = cotPriceEntry.close_price;
+                                                        const diff = current - cotPrice;
+                                                        const diffPct = (diff / cotPrice) * 100;
+                                                        const isDiffUp = diff >= 0;
+
+                                                        return (
+                                                            <div className="flex items-center gap-1.5 mt-2 ml-1">
+                                                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Since Last COT</span>
+                                                                <span className={`text-[10px] font-black tracking-wide ${isDiffUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                                    {isDiffUp ? '▲' : '▼'} {Math.abs(diffPct).toFixed(2)}%
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
+                                            </div>
+                                        );
+                                    })()
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3 mt-4">
+                                <a
+                                    href={`https://www.tradingview.com/symbols/${data.yahoo_ticker.replace('=F', '')}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="group flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all duration-300"
+                                >
+                                    <span className="text-xs font-black text-gray-700 dark:text-gray-300 tracking-wide">
+                                        {data.yahoo_ticker}
+                                    </span>
+                                    <div className="bg-white dark:bg-white/10 rounded-full p-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                                        <Activity size={10} className="text-blue-500" />
+                                    </div>
+                                </a>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                    {data.market_category || 'Futures'} • {data.exchange || 'CME'}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="bg-white dark:bg-black/40 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/10 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">High Alerts</p>
-                                <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                                    {historyData.historical_alerts.filter(a => a.alert_level === 'High').length}
-                                </p>
-                            </div>
-                            <TrendingUp className="text-red-500" size={32} />
+
+                        {/* Visual Separator */}
+                        <div className="hidden md:block w-px bg-gradient-to-b from-transparent via-gray-200 dark:via-white/10 to-transparent"></div>
+
+                        {/* 2. Report Status (Enhanced Staleness) */}
+                        <div className="flex flex-col justify-center min-w-[200px]">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                                Report Status
+                                <div className="relative flex items-center justify-center w-2 h-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gray-400"></span>
+                                </div>
+                            </span>
+
+                            {(() => {
+                                if (historyData.historical_reports.length === 0) return null;
+                                const reportDateStr = historyData.historical_reports[0].report_date;
+                                const reportDate = new Date(reportDateStr);
+                                const diffTime = Math.abs(new Date().getTime() - reportDate.getTime());
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                let dotColor = "bg-emerald-500";
+                                let shadowColor = "shadow-emerald-500/50";
+                                let ringColor = "border-emerald-500/20";
+                                let statusText = "Fresh Data";
+
+                                if (diffDays > 7) {
+                                    dotColor = "bg-rose-500";
+                                    shadowColor = "shadow-rose-500/50";
+                                    ringColor = "border-rose-500/20";
+                                    statusText = "Stale Data";
+                                }
+                                else if (diffDays > 4) {
+                                    dotColor = "bg-amber-500";
+                                    shadowColor = "shadow-amber-500/50";
+                                    ringColor = "border-amber-500/20";
+                                    statusText = "Aging Data";
+                                }
+
+                                return (
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <div className="relative flex items-center justify-center w-4 h-4">
+                                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColor}`}></span>
+                                                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${dotColor} ${shadowColor} shadow-lg`}></span>
+                                            </div>
+                                            <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                                                {reportDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 ml-7">
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${ringColor} ${dotColor.replace('bg-', 'text-')} bg-opacity-10 uppercase tracking-wider`}>
+                                                {statusText}
+                                            </span>
+                                            <span className="text-[11px] font-medium text-gray-400">
+                                                ({diffDays}d ago)
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 ml-7 mt-1">
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                                Next Report: <span className="text-gray-900 dark:text-white">
+                                                    {(() => {
+                                                        const d = new Date();
+                                                        const day = d.getDay();
+                                                        const diff = (5 - day + 7) % 7 || 7; // Next Friday
+                                                        d.setDate(d.getDate() + diff);
+                                                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                                    })()}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
-                    </div>
-                    <div className="bg-white dark:bg-black/40 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/10 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Data Points</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{historyData.historical_reports.length}</p>
-                            </div>
-                            <TrendingDown className="text-green-500" size={32} />
+
+                        {/* Visual Separator */}
+                        <div className="hidden md:block w-px bg-gradient-to-b from-transparent via-gray-200 dark:via-white/10 to-transparent"></div>
+
+                        {/* 3. Sentiment Badge (Enhanced) */}
+                        <div className="flex flex-col justify-center min-w-[220px]">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Market Bias</span>
+                            {(() => {
+                                const report = historyData.historical_reports[0];
+                                if (!report) return null;
+                                const gap = calculateSentimentGap(report);
+                                const confidence = stalenessData?.reliability_pct || 0;
+                                const isStale = confidence < 30;
+
+                                let label = "NEUTRAL";
+                                // Default styles
+                                let gradient = "from-gray-100 to-gray-200 dark:from-white/5 dark:to-white/10";
+                                let text = "text-gray-600 dark:text-gray-300";
+                                let border = "border-gray-200 dark:border-white/10";
+                                let glow = "";
+
+                                if (gap > 20) {
+                                    label = "EXTREME BULLISH";
+                                    gradient = "from-emerald-500/10 to-emerald-500/20";
+                                    text = "text-emerald-600 dark:text-emerald-400";
+                                    border = "border-emerald-500/20";
+                                    glow = "shadow-[0_0_20px_rgba(16,185,129,0.15)]";
+                                }
+                                else if (gap > 5) {
+                                    label = "BULLISH";
+                                    gradient = "from-emerald-500/5 to-emerald-500/10";
+                                    text = "text-emerald-600 dark:text-emerald-400";
+                                    border = "border-emerald-500/20";
+                                }
+                                else if (gap < -20) {
+                                    label = "EXTREME BEARISH";
+                                    gradient = "from-rose-500/10 to-rose-500/20";
+                                    text = "text-rose-600 dark:text-rose-400";
+                                    border = "border-rose-500/20";
+                                    glow = "shadow-[0_0_20px_rgba(244,63,94,0.15)]";
+                                }
+                                else if (gap < -5) {
+                                    label = "BEARISH";
+                                    gradient = "from-rose-500/5 to-rose-500/10";
+                                    text = "text-rose-600 dark:text-rose-400";
+                                    border = "border-rose-500/20";
+                                }
+
+                                if (isStale) {
+                                    gradient = "from-gray-100 to-gray-200 dark:from-white/5 dark:to-white/10";
+                                    text = "text-gray-400";
+                                    border = "border-gray-200 dark:border-white/5";
+                                    glow = "";
+                                    label += " (STALE)";
+                                }
+
+                                return (
+                                    <div className="flex flex-col items-start gap-2">
+                                        <div className={`relative px-5 py-3 rounded-xl border bg-gradient-to-br ${gradient} ${border} ${glow} transition-all duration-300 group-hover:scale-[1.02]`}>
+                                            <span className={`text-sm font-black tracking-widest ${text}`}>
+                                                {label}
+                                            </span>
+                                        </div>
+                                        {stalenessData && (
+                                            <div className="flex items-center gap-1.5 pl-1">
+                                                <div className="h-1 w-12 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={`h-full rounded-full ${confidence > 50 ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                                                        style={{ width: `${confidence}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                                                    Confidence: {confidence}%
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>
+
+                {/* COT Staleness Indicator */}
+                <COTStalenessIndicator contractId={Number(contractId)} />
 
                 {/* COT Positions Chart */}
                 <div className="bg-white dark:bg-black/40 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/10 p-6 mb-8">

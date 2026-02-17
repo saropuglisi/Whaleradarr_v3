@@ -9,6 +9,7 @@ import {
     ResponsiveContainer,
     ReferenceLine
 } from 'recharts';
+import { Info } from 'lucide-react';
 
 interface COTOscillatorProps {
     reports: any[];
@@ -16,6 +17,7 @@ interface COTOscillatorProps {
 
 const COTOscillator: React.FC<COTOscillatorProps> = ({ reports }) => {
     const [lookbackYears, setLookbackYears] = useState<number>(3);
+    const [showGlossary, setShowGlossary] = useState(false);
 
     const chartData = useMemo(() => {
         if (!reports || reports.length === 0) return [];
@@ -62,9 +64,17 @@ const COTOscillator: React.FC<COTOscillatorProps> = ({ reports }) => {
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-6">
             <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        COT Index Oscillator
-                    </h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            COT Index Oscillator
+                        </h3>
+                        <button
+                            onClick={() => setShowGlossary(!showGlossary)}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Normalized Asset Manager positioning (0-100). Identifies statistical extremes.
                     </p>
@@ -140,6 +150,23 @@ const COTOscillator: React.FC<COTOscillatorProps> = ({ reports }) => {
                     <span className="text-gray-600 dark:text-gray-300"><strong>0-10:</strong> Historic Extreme Short</span>
                 </div>
             </div>
+
+            {/* Glossary Section */}
+            {showGlossary && (
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Oscillator Glossary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                            <span className="font-bold text-green-500">Overbought (&gt;80):</span>
+                            <p className="text-xs mt-1 leading-relaxed">Whales have historically been this Long rarely. Risk of reversal or pause is high.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-red-500">Oversold (&lt;20):</span>
+                            <p className="text-xs mt-1 leading-relaxed">Whales have historically been this Short rarely. Markets often bounce from these levels.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

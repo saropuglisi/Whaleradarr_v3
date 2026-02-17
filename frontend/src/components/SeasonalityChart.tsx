@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Info } from 'lucide-react';
 
 interface SeasonalityChartProps {
     contractId: number;
@@ -18,6 +19,7 @@ const SeasonalityChart: React.FC<SeasonalityChartProps> = ({ contractId }) => {
     const [availableYears, setAvailableYears] = useState<number[]>([]);
     const [years, setYears] = useState(5);
     const [loading, setLoading] = useState(true);
+    const [showGlossary, setShowGlossary] = useState(false);
 
     useEffect(() => {
         const fetchSeasonality = async () => {
@@ -55,9 +57,17 @@ const SeasonalityChart: React.FC<SeasonalityChartProps> = ({ contractId }) => {
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-6">
             <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        Seasonality Analysis
-                    </h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            Seasonality Analysis
+                        </h3>
+                        <button
+                            onClick={() => setShowGlossary(!showGlossary)}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Compare year-over-year trends by category.
                     </p>
@@ -140,6 +150,23 @@ const SeasonalityChart: React.FC<SeasonalityChartProps> = ({ contractId }) => {
                 <span className="font-semibold text-gray-700 dark:text-gray-300">Tip:</span>
                 The thickest line represents the most recent year. Compare its trajectory against historical seasonal averages.
             </div>
+
+            {/* Glossary Section */}
+            {showGlossary && (
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Seasonality Glossary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Cyclical Patterns:</span>
+                            <p className="text-xs mt-1 leading-relaxed">Many commodities and currencies have repetitive yearly cycles (e.g. Heating Oil in winter).</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Divergence:</span>
+                            <p className="text-xs mt-1 leading-relaxed">If this year's line is going DOWN while history usually goes UP, that's a significant anomaly.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

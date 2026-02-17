@@ -11,6 +11,7 @@ import {
     ResponsiveContainer,
     Cell
 } from 'recharts';
+import { Info } from 'lucide-react';
 
 interface HistoricalReport {
     report_date: string;
@@ -104,6 +105,7 @@ const AdvancedPriceChart: React.FC<AdvancedPriceChartProps> = ({
     const [selectedCorrelationId, setSelectedCorrelationId] = useState<number | null>(null);
     const [correlationData, setCorrelationData] = useState<PriceHistory[] | null>(null);
     const [loadingCorrelation, setLoadingCorrelation] = useState(false);
+    const [showGlossary, setShowGlossary] = useState(false);
 
     // Fetch correlation data when a contract is selected
     React.useEffect(() => {
@@ -212,9 +214,17 @@ const AdvancedPriceChart: React.FC<AdvancedPriceChartProps> = ({
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-6">
             <div className="flex flex-col xl:flex-row items-start justify-between mb-6 gap-4">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        Price vs. Positions
-                    </h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            Price vs. Positions
+                        </h3>
+                        <button
+                            onClick={() => setShowGlossary(!showGlossary)}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Overlay institutional positioning on {contractName} price action.
                     </p>
@@ -383,6 +393,31 @@ const AdvancedPriceChart: React.FC<AdvancedPriceChartProps> = ({
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
+
+            {/* Glossary Section */}
+            {showGlossary && (
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Chart Glossary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                            <span className="font-bold text-emerald-500">Asset Mgr Net:</span>
+                            <p className="text-xs mt-1 leading-relaxed">The "Smart Money". Institutional investors managing pension funds, endowments, etc. Usually trend-following.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-amber-500">Leveraged Funds:</span>
+                            <p className="text-xs mt-1 leading-relaxed">Hedge funds and speculators. Often use leverage. Can be contrarian indicators at extremes.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-blue-500">Dealer Net:</span>
+                            <p className="text-xs mt-1 leading-relaxed">The banks/brokers acting as market makers. They take the other side of trades, providing liquidity.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-purple-500">Open Interest:</span>
+                            <p className="text-xs mt-1 leading-relaxed">Total number of outstanding contracts. Rising OI confirms trends; falling OI suggests reversals.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

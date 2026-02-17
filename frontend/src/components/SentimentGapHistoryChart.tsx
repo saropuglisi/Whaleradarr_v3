@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Info } from 'lucide-react';
 
 interface HistoricalReport {
     report_date: string;
@@ -17,6 +17,7 @@ interface SentimentGapHistoryChartProps {
 }
 
 const SentimentGapHistoryChart: React.FC<SentimentGapHistoryChartProps> = ({ reports }) => {
+    const [showGlossary, setShowGlossary] = useState(false);
     const chartData = useMemo(() => {
         if (!reports || reports.length === 0) return [];
 
@@ -114,9 +115,17 @@ const SentimentGapHistoryChart: React.FC<SentimentGapHistoryChartProps> = ({ rep
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-6">
             <div className="flex items-start justify-between mb-6">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        Sentiment Gap Evolution
-                    </h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            Sentiment Gap Evolution
+                        </h3>
+                        <button
+                            onClick={() => setShowGlossary(!showGlossary)}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         6-month trend • {isTrendUp ? 'Widening' : 'Narrowing'} divergence
                     </p>
@@ -176,6 +185,23 @@ const SentimentGapHistoryChart: React.FC<SentimentGapHistoryChartProps> = ({ rep
                     )}
                 </p>
             </div>
+
+            {/* Glossary Section */}
+            {showGlossary && (
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Evolution Glossary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Trend:</span>
+                            <p className="text-xs mt-1 leading-relaxed">Are Whales getting MORE or LESS confident compared to 6 months ago? Increasing gap = Stronger signal.</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-900 dark:text-white">Convergence:</span>
+                            <p className="text-xs mt-1 leading-relaxed">When the gap nears zero, Whales and Retail agree. This often happens in choppy/ranging markets.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

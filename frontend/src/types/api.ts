@@ -13,8 +13,10 @@ export interface Contract {
     contract_name: string;
     market_category: string;
     yahoo_ticker?: string;
+    exchange?: string;
     is_active: boolean;
     statistics?: ContractStatistics[];
+    latest_report?: WeeklyReport; // Re-use WeeklyReport interface for simplicity, or pick fields
 }
 
 export interface WeeklyReport {

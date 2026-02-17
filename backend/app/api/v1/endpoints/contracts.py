@@ -8,7 +8,7 @@ from app.db.session import SessionLocal
 from app.models.contract import Contract
 from app.models.statistics import ContractStatistics
 from app.models.report import WeeklyReport
-from app.schemas.contract import ContractSchema, ContractDetailSchema, ContractStatsSchema
+from app.schemas.contract import ContractSchema, ContractDetailSchema, ContractStatsSchema, ContractReportSummarySchema
 
 
 
@@ -27,13 +27,39 @@ def get_contracts(
     active_only: bool = True
 ):
     """
-    Get list of contracts.
+    Get list of contracts with their latest report.
     """
-    query = db.query(Contract)
+    # Subquery to get latest report date per contract
+    # We need to explicitly order by date to ensure we get the absolute latest
+    subquery = db.query(
+        WeeklyReport.contract_id,
+        func.max(WeeklyReport.report_date).label('max_date')
+    ).group_by(WeeklyReport.contract_id).subquery()
+
+    # Query contracts and join with the specific report that matches the max date
+    results = db.query(Contract, WeeklyReport).outerjoin(
+        subquery, Contract.id == subquery.c.contract_id
+    ).outerjoin(
+        WeeklyReport,
+        (WeeklyReport.contract_id == Contract.id) & 
+        (WeeklyReport.report_date == subquery.c.max_date)
+    )
+
     if active_only:
-        query = query.filter(Contract.is_active == True)
+        results = results.filter(Contract.is_active == True)
+    
+    # Sort by market category and then name
+    results = results.order_by(Contract.market_category, Contract.contract_name).all()
+
+    # Manually construct response to include nested report
+    contracts_list = []
+    for contract, report in results:
+        contract_data = ContractSchema.model_validate(contract)
+        if report:
+            contract_data.latest_report = ContractReportSummarySchema.model_validate(report)
+        contracts_list.append(contract_data)
         
-    return query.all()
+    return contracts_list
 
 @router.get("/{contract_id}", response_model=ContractDetailSchema)
 def get_contract_detail(
