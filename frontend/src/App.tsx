@@ -6,6 +6,7 @@ import Help from './pages/Help';
 import ContractDetail from './pages/ContractDetail';
 
 import HeatmapAnalysis from './pages/HeatmapAnalysis';
+import SmartMoneyRadar from './pages/SmartMoneyRadar';
 
 function App() {
   // Initialize theme early to prevent flash
@@ -26,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/analysis" element={<HeatmapAnalysis />} />
+          <Route path="/radar" element={<SmartMoneyRadar />} />
           <Route path="/help" element={<Help />} />
           <Route path="/contract/:id" element={<ContractDetail />} />
         </Routes>

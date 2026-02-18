@@ -178,7 +178,8 @@ def get_contract_history(
                 "low_price": float(price.low_price) if price.low_price else None,
                 "close_price": float(price.close_price),
                 "reporting_vwap": float(price.reporting_vwap) if price.reporting_vwap else None,
-                "close_vs_vwap_pct": float(price.close_vs_vwap_pct) if price.close_vs_vwap_pct else None
+                "close_vs_vwap_pct": float(price.close_vs_vwap_pct) if price.close_vs_vwap_pct else None,
+                "volume": int(price.volume) if price.volume else 0
             }
             for price in prices
         ]

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Activity } from 'lucide-react';
+import { ArrowLeft, Activity, HelpCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import SeasonalityChart from '../components/SeasonalityChart';
 import FullReportsTable from '../components/FullReportsTable';
@@ -12,6 +12,8 @@ import PriceDistanceIndicator from '../components/PriceDistanceIndicator';
 import HistoricalEdge from '../components/HistoricalEdge';
 import COTStalenessIndicator from '../components/COTStalenessIndicator';
 import SmartSignalCard from '../components/SmartSignalCard';
+import OnboardingTutorial from '../components/OnboardingTutorial';
+import VolumeAnalysisChart from '../components/VolumeAnalysisChart';
 
 
 interface HistoricalReport {
@@ -46,6 +48,7 @@ interface PriceHistory {
     high_price?: number;
     low_price?: number;
     close_price: number;
+    volume: number;
     reporting_vwap?: number;
 }
 
@@ -91,6 +94,16 @@ const ContractDetail: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     const [stalenessData, setStalenessData] = useState<any>(null);
+    const [showTutorial, setShowTutorial] = useState(false);
+
+    useEffect(() => {
+        // Check if tutorial has been completed
+        const completed = localStorage.getItem('whaleradarr_onboarding_completed');
+        if (!completed) {
+            // Small delay to ensure loading is done
+            setTimeout(() => setShowTutorial(true), 1500);
+        }
+    }, []);
 
     useEffect(() => {
         const fetchCriticalData = async () => {
@@ -166,11 +179,7 @@ const ContractDetail: React.FC = () => {
         leveraged: report.lev_net,
     }));
 
-    const priceData = [...historyData.price_history].reverse().map(price => ({
-        date: new Date(price.report_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        price: price.close_price,
-        vwap: price.reporting_vwap,
-    }));
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black p-6">
@@ -181,9 +190,17 @@ const ContractDetail: React.FC = () => {
                         <ArrowLeft size={20} />
                         <span>Back to Dashboard</span>
                     </Link>
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                        {data.contract_name}
-                    </h1>
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                            {data.contract_name}
+                        </h1>
+                        <button
+                            onClick={() => setShowTutorial(true)}
+                            className="bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                        >
+                            <HelpCircle size={14} className="inline mr-1 -mt-0.5" /> Tutorial
+                        </button>
+                    </div>
                     <p className="text-gray-600 dark:text-gray-400">
                         Historical COT Positions & Price Analysis
                     </p>
@@ -191,12 +208,14 @@ const ContractDetail: React.FC = () => {
 
                 {/* Smart Signal Indicator */}
                 {historyData && (
-                    <SmartSignalCard
-                        reports={historyData.historical_reports}
-                        alerts={historyData.historical_alerts}
-                        priceHistory={historyData.price_history}
-                        stalenessData={stalenessData}
-                    />
+                    <div id="smart-signal-card">
+                        <SmartSignalCard
+                            reports={historyData.historical_reports}
+                            alerts={historyData.historical_alerts}
+                            priceHistory={historyData.price_history}
+                            stalenessData={stalenessData}
+                        />
+                    </div>
                 )}
 
                 {/* Market Context Header - Premium Style */}
@@ -447,7 +466,9 @@ const ContractDetail: React.FC = () => {
                 </div>
 
                 {/* COT Staleness Indicator */}
-                <COTStalenessIndicator contractId={Number(contractId)} />
+                <div id="staleness-card">
+                    <COTStalenessIndicator contractId={Number(contractId)} />
+                </div>
 
                 {/* COT Positions Chart */}
                 <div className="bg-white dark:bg-black/40 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/10 p-6 mb-8">
@@ -503,52 +524,12 @@ const ContractDetail: React.FC = () => {
                     </ResponsiveContainer>
                 </div>
 
-                {/* Price History Chart */}
-                <div className="bg-white dark:bg-black/40 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/10 p-6 mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                        Price & VWAP History
-                    </h2>
-                    <ResponsiveContainer width="100%" height={400}>
-                        <LineChart data={priceData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
-                            <XAxis
-                                dataKey="date"
-                                stroke="#9CA3AF"
-                                tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                            />
-                            <YAxis
-                                stroke="#9CA3AF"
-                                tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                            />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: '#1F2937',
-                                    border: '1px solid #374151',
-                                    borderRadius: '8px',
-                                    color: '#F3F4F6'
-                                }}
-                            />
-                            <Legend />
-                            <Line
-                                type="monotone"
-                                dataKey="price"
-                                stroke="#8B5CF6"
-                                strokeWidth={2}
-                                name="Close Price"
-                                dot={false}
-                            />
-                            <Line
-                                type="monotone"
-                                dataKey="vwap"
-                                stroke="#EC4899"
-                                strokeWidth={2}
-                                strokeDasharray="5 5"
-                                name="VWAP"
-                                dot={false}
-                            />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
+                {/* Volume & Market Structure Chart (Replaces old Price/VWAP) */}
+                <VolumeAnalysisChart
+                    prices={historyData.price_history}
+                    reports={historyData.historical_reports}
+                    contractName={data.contract_name}
+                />
 
                 {/* Recent Alerts Table */}
                 <div className="bg-white dark:bg-black/40 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/10 p-6">
@@ -629,6 +610,9 @@ const ContractDetail: React.FC = () => {
                 {/* Full Historical Reports */}
                 <FullReportsTable contractId={data.id} />
             </div>
+
+            {/* Onboarding Tutorial */}
+            {showTutorial && <OnboardingTutorial onClose={() => setShowTutorial(false)} />}
         </div>
     );
 };

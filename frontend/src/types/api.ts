@@ -46,6 +46,46 @@ export interface WeeklyReport {
     open_interest_chg: number;
 }
 
+export interface RadarContract {
+    id: number;
+    ticker: string;
+    name: string;
+    category: string;
+    score: number;
+    grade: string;
+    direction: "BULLISH" | "BEARISH" | "NEUTRAL";
+    confidence: number;
+    sentiment_gap: number;
+    capital_flow_fmt: string;
+    win_rate: number;
+    momentum_1w: number;
+    last_updated: string;
+    next_report_date: string;
+    breakdown: {
+        signal_quality: number;
+        sentiment_divergence: number;
+        capital_momentum: number;
+        historical_edge: number;
+        concentration: number;
+    };
+}
+
+export interface RadarInsight {
+    regime: string;
+    confidence: number;
+    what_happening: string;
+    historical_outcome: string;
+    catalysts: string[];
+    action: string;
+}
+
+export interface RadarResponse {
+    top_play: RadarContract | null;
+    rankings: RadarContract[];
+    sector_summary: Record<string, number>;
+    insights: RadarInsight | null;
+}
+
 export interface WhaleAlert {
     id: number;
     contract_id: number;

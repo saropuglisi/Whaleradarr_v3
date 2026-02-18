@@ -27,6 +27,7 @@ interface PriceHistory {
     high_price?: number;
     low_price?: number;
     close_price: number;
+    volume: number;
 }
 
 interface AdvancedPriceChartProps {
@@ -183,6 +184,7 @@ const AdvancedPriceChart: React.FC<AdvancedPriceChartProps> = ({
 
                 // Candle Data
                 open, high, low, close,
+                volume: p?.volume || 0,
                 priceRange: [low, high], // For Bar chart range
 
                 // Metrics
@@ -302,6 +304,13 @@ const AdvancedPriceChart: React.FC<AdvancedPriceChartProps> = ({
                             tick={{ fontSize: 11 }}
                             minTickGap={30}
                         />
+                        {/* Volume Axis (Hidden, scaled to bottom 20%) */}
+                        <YAxis
+                            yAxisId="volume"
+                            orientation="left"
+                            domain={[0, 'dataMax * 5']}
+                            hide={true}
+                        />
                         {/* Left Axis: Positions */}
                         <YAxis
                             yAxisId="left"
@@ -342,6 +351,7 @@ const AdvancedPriceChart: React.FC<AdvancedPriceChartProps> = ({
                                 const label = m ? m.label : name;
 
                                 if (name === 'priceRange') return [null, null]; // Hide range array
+                                if (name === 'volume') return [value.toLocaleString(), 'Volume'];
                                 if (name === 'open' || name === 'close' || name === 'high' || name === 'low') return [value, name];
                                 if (name === 'correlationPrice') {
                                     const selectedContract = allContracts.find(c => c.id === selectedCorrelationId);
@@ -351,6 +361,15 @@ const AdvancedPriceChart: React.FC<AdvancedPriceChartProps> = ({
                                 return [Math.round(value).toLocaleString(), label];
                             }}
                             labelFormatter={(label) => `${label}`}
+                        />
+
+                        {/* Volume Bars */}
+                        <Bar
+                            yAxisId="volume"
+                            dataKey="volume"
+                            fill="#374151"
+                            opacity={0.3}
+                            isAnimationActive={false}
                         />
 
                         {/* Candlesticks (Price) */}

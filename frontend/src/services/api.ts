@@ -34,4 +34,9 @@ export const api = {
         const response = await apiClient.get<any>(`/analysis/heatmap?${params.toString()}`);
         return response.data;
     },
+
+    getSmartMoneyRadar: async (): Promise<any> => {
+        const response = await apiClient.get<any>('/analysis/radar');
+        return response.data;
+    }
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, BarChart3, HelpCircle, Menu, X } from 'lucide-react';
+import { Sun, Moon, BarChart3, HelpCircle, Menu, X, Target } from 'lucide-react';
 
 const Navbar: React.FC = () => {
     const [isDark, setIsDark] = useState(true);
@@ -75,6 +75,17 @@ const Navbar: React.FC = () => {
                         >
                             <BarChart3 size={18} className="rotate-90" />
                             Heatmap
+                        </Link>
+
+                        <Link
+                            to="/radar"
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/radar')
+                                ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                                }`}
+                        >
+                            <Target size={18} />
+                            Smart Radar
                         </Link>
 
                         <Link

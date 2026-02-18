@@ -8,6 +8,7 @@ from app.db.session import SessionLocal
 from app.models.contract import Contract
 from app.models.report import WeeklyReport
 from app.services.analysis.cot_staleness import COTStalenessService
+from app.services.analysis.smart_radar import SmartRadarService
 
 router = APIRouter()
 
@@ -166,3 +167,13 @@ def get_cot_staleness(
             raise HTTPException(status_code=404, detail=result["error"])
     
     return result
+
+@router.get("/radar")
+def get_smart_radar(
+    db: Session = Depends(get_db)
+):
+    """
+    Get Smart Money Radar rankings and insights.
+    """
+    radar_service = SmartRadarService(db)
+    return radar_service.get_radar_rankings()
