@@ -22,6 +22,7 @@ def create_views():
         SELECT 
             c.yahoo_ticker as ticker,
             c.contract_name,
+            r.contract_id,
             r.report_date,
             
             -- PREZZI (Tuesday OHLC)

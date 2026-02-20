@@ -12,7 +12,7 @@ class PriceLoaderService:
         self.db = db
 
     def fetch_and_load_prices(self, days_back: int = 365 * 10):
-        """Scarica i prezzi e gestisce i festivi con logica Forward Fill"""
+        """Downloads prices and handles holidays with Forward Fill logic"""
         contracts = self.db.query(Contract).filter(Contract.yahoo_ticker != None).all()
         
         for contract in contracts:
@@ -25,24 +25,24 @@ class PriceLoaderService:
                 logger.warning(f"No price data found for {contract.yahoo_ticker}")
                 continue
 
-            # 1. Preparazione DataFrame
-            df.index = df.index.tz_localize(None) # Rimuoviamo timezone per compatibilità DB
+            # 1. DataFrame Preparation
+            df.index = df.index.tz_localize(None) # Remove timezone for DB compatibility
             
-            # Creiamo un range completo di date per non perdere i Martedì festivi
+            # Create a full range of dates to not miss holiday Tuesdays
             all_dates = pd.date_range(start=df.index.min(), end=df.index.max(), freq='D')
             df = df.reindex(all_dates)
             
-            # 2. FORWARD FILL: Se un giorno manca (festivo), prendi il prezzo del giorno prima
+            # 2. FORWARD FILL: If a day is missing (holiday), take the price of the previous day
             df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].ffill()
             
             df = df.reset_index().rename(columns={'index': 'Date'})
             df['Date'] = df['Date'].dt.date
             
-            # 3. Estrazione dei Martedì (Tuesday = 1)
+            # 3. Extraction of Tuesdays (Tuesday = 1)
             records = []
             for i, row in df.iterrows():
                 if row['Date'].weekday() == 1:
-                    # Se dopo il ffill è ancora NaN (capita solo all'inizio dello storico), saltiamo
+                    # If after ffill it's still NaN (happens only at the start of historical data), skip
                     if pd.isna(row['Close']):
                         continue
                     
@@ -68,7 +68,7 @@ class PriceLoaderService:
             if not records:
                 continue
 
-            # 4. Upsert su PostgreSQL
+            # 4. Upsert to PostgreSQL
             stmt = insert(WeeklyPrice).values(records)
             update_cols = {
                 col.name: col 
@@ -90,14 +90,14 @@ class PriceLoaderService:
 
     def _calculate_vwap_window(self, df: pd.DataFrame, report_date, close_price):
         """
-        Calcola il VWAP per la finestra di reporting (Mercoledì precedente -> Martedì report_date).
-        Restituisce (vwap, close_vs_vwap_pct).
+        Calculates the VWAP for the reporting window (Previous Wednesday -> Report Tuesday).
+        Returns (vwap, close_vs_vwap_pct).
         """
-        # La finestra include: Mer, Gio, Ven, Lun, Mar (5 giorni di trading ideali)
-        # Usiamo timedelta per trovare il mercoledì precedente
+        # The window includes: Wed, Thu, Fri, Mon, Tue (5 ideal trading days)
+        # Use timedelta to find the previous Wednesday
         prev_wednesday = report_date - timedelta(days=6)
         
-        # Slice del DataFrame per la finestra
+        # DataFrame slice for the window
         window_mask = (df['Date'] >= prev_wednesday) & (df['Date'] <= report_date)
         window_df = df.loc[window_mask].copy() # Copy to avoid SettingWithCopyWarning
         
@@ -107,7 +107,7 @@ class PriceLoaderService:
         if not window_df.empty and window_df['Volume'].sum() > 0:
             # VWAP = Sum(Typical Price * Volume) / Sum(Volume)
             # Typical Price = (High + Low + Close) / 3
-            # Assicuriamoci di usare i nomi colonne corretti come nel DataFrame originale
+            # Ensure using the correct column names as in the original DataFrame
             window_df['Typical_Price'] = (window_df['High'] + window_df['Low'] + window_df['Close']) / 3
             window_df['PV'] = window_df['Typical_Price'] * window_df['Volume']
             
@@ -117,7 +117,7 @@ class PriceLoaderService:
             if total_vol > 0:
                 reporting_vwap = total_pv / total_vol
                 
-                # Calcolo % Close vs VWAP
+                # % Close vs VWAP Calculation
                 if reporting_vwap != 0 and close_price is not None:
                     close_vs_vwap_pct = ((close_price - reporting_vwap) / reporting_vwap) * 100
                     

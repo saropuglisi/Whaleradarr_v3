@@ -5,7 +5,7 @@ from datetime import datetime
 from loguru import logger
 from sqlalchemy import text
 
-# Fix path import per eseguire lo script da backend/ o root
+# Fix path import to run the script from backend/ or root
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 from app.db.session import SessionLocal, engine
@@ -20,7 +20,7 @@ from app.services.data.cot_loader import COTLoaderService
 
 def init_db():
     logger.info("Initializing Database Schema (Full Reset)...")
-    # Attenzione: Questo cancella tutti i dati esistenti
+    # Warning: This deletes all existing data
     db = SessionLocal()
     try:
         db.execute(text("DROP VIEW IF EXISTS v_weekly_report_changes CASCADE;"))
@@ -34,7 +34,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 def seed_contracts(db):
-    """Popola contracts table da JSON"""
+    """Populates contracts table from JSON"""
     json_path = os.path.join(os.path.dirname(__file__), 'seed_contracts.json')
     try:
         with open(json_path) as f:
@@ -65,14 +65,14 @@ def main():
         init_db()
         seed_contracts(db)
         
-        # Path corretto al JSON
+        # Correct path to JSON
         json_path = os.path.join(os.path.dirname(__file__), 'seed_contracts.json')
         ingestor = CFTCIngestor(whitelist_path=json_path)
         loader = COTLoaderService(db)
         
         current_year = datetime.now().year
         
-        # 1. Historical Ingestion (es. 2015-2026)
+        # 1. Historical Ingestion (e.g., 2015-2026)
         start_year = 2015
         logger.info(f"Starting ingestion from {start_year} to {current_year}...")
         
@@ -89,7 +89,7 @@ def main():
             if not df_dis.empty:
                 loader.upsert_reports(df_dis)
             
-        # 2. Live Ingestion (Ultimo Report TXT)
+        # 2. Live Ingestion (Latest TXT Report)
         logger.info(f"--- Fetching LIVE Data (Latest Available) ---")
         
         # Live Financial

@@ -9,7 +9,7 @@ import pandas as pd
 class COTLoaderService:
     def __init__(self, db: Session):
         self.db = db
-        # Pre-carica mappa ID
+        # Pre-load ID map
         self.contract_map = {
             c.cftc_contract_code: c.id 
             for c in db.query(Contract).all()
@@ -25,7 +25,7 @@ class COTLoaderService:
             if c_code not in self.contract_map:
                 continue 
 
-            # Calcolo Ratio (evitiamo div zero)
+            # Ratio calculation (avoid div zero)
             def calc_ratio(l, s):
                 l, s = float(l), float(s)
                 return round(l / s, 4) if s > 0 else l
@@ -68,7 +68,7 @@ class COTLoaderService:
         # PostgreSQL Upsert
         stmt = insert(WeeklyReport).values(records)
         
-        # Escludiamo esplicitamente le colonne Computed per evitare errori in PostgreSQL
+        # Explicitly exclude Computed columns to avoid errors in PostgreSQL
         generated_cols = ['id', 'contract_id', 'report_date', 'lev_gross_exposure', 'dealer_net', 'asset_mgr_net', 'lev_net']
         
         update_cols = {

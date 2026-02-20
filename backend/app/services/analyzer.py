@@ -15,12 +15,12 @@ class AnalyzerService:
 
     def update_contract_statistics(self, contract_id: int, lookback_window: int = 156): # 3 Years (~156 weeks)
         """
-        Calcola e aggiorna le statistiche (Median, IQR, Min, Max) per un contratto.
-        Usa una finestra mobile (lookback_window) per Robust Z-Score.
+        Calculates and updates statistics (Median, IQR, Min, Max) for a contract.
+        Uses a moving window (lookback_window) for Robust Z-Score.
         """
         logger.info(f"Updating statistics for contract {contract_id}...")
         
-        # 1. Fetch Dati Storici
+        # 1. Fetch Historical Data
         reports = self.db.query(WeeklyReport).filter(
             WeeklyReport.contract_id == contract_id
         ).order_by(WeeklyReport.report_date.asc()).all()
@@ -44,13 +44,13 @@ class AnalyzerService:
         
         df = pd.DataFrame(data)
         
-        if len(df) < 52: # Almeno 1 anno di dati per statistiche sensate
+        if len(df) < 52: # At least 1 year of data for meaningful statistics
             logger.warning(f"Insufficient data for contract {contract_id} (rows={len(df)})")
-            # Proseguiamo comunque ma con cautela... o return? Spec non specifica.
-            # Facciamo best effort.
+            # Proceed anyway but with caution... or return? Spec doesn't specify.
+            # Let's do best effort.
         
-        # 2. Calcola Statistiche per ogni Categoria
-        # Categorie da tracciare per Z-Score e COT Index
+        # 2. Calculate Statistics for each Category
+        # Categories to track for Z-Score and COT Index
         categories = {
             ('dealer', 'net'): df['dealer_net'],
             ('asset_mgr', 'net'): df['asset_mgr_net'],
@@ -61,18 +61,18 @@ class AnalyzerService:
         }
 
         for (cat_name, pos_type), series in categories.items():
-            # Ultimi N periodi per Rolling Stats
-            # Se la serie è più corta della finestra, usiamo tutto
+            # Last N periods for Rolling Stats
+            # If the series is shorter than the window, use everything
             window_data = series.tail(lookback_window)
             
-            # Calcolo Robust Stats (Median / IQR)
+            # Robust Stats Calculation (Median / IQR)
             median = window_data.median()
             q1 = window_data.quantile(0.25)
             q3 = window_data.quantile(0.75)
             iqr = q3 - q1
             
-            # Calcolo Min/Max (COT Index su finestra più lunga? O stessa? Spesso 3-5 anni)
-            # Usiamo tutto lo storico disponibile per Min/Max COT Index per ora
+            # Min/Max Calculation (COT Index on a longer window? Or the same? Often 3-5 years)
+            # Use all available historical data for Min/Max COT Index for now
             all_min = series.min()
             all_max = series.max()
             
@@ -82,8 +82,8 @@ class AnalyzerService:
         logger.success(f"Statistics updated for contract {contract_id}")
 
     def _save_statistics(self, contract_id, cat, pos, median, iqr, min_val, max_val):
-        """Salva o aggiorna le statistiche nel DB"""
-        # Cerca record esistente
+        """Saves or updates statistics in the DB"""
+        # Search for existing record
         stat = self.db.query(ContractStatistics).filter(
             ContractStatistics.contract_id == contract_id,
             ContractStatistics.trader_category == cat,
@@ -111,11 +111,11 @@ class AnalyzerService:
 
     def generate_alerts(self, contract_id: int):
         """
-        Genera alert per l'ultimo report disponibile confrontandolo con le statistiche.
+        Generates alerts for the last available report by comparing it with statistics.
         """
         logger.info(f"Generating alerts for contract {contract_id}...")
         
-        # 1. Fetch Ultimo Report & Prezzo
+        # 1. Fetch Last Report & Price
         report = self.db.query(WeeklyReport).filter(
             WeeklyReport.contract_id == contract_id
         ).order_by(WeeklyReport.report_date.desc()).first()
@@ -129,7 +129,7 @@ class AnalyzerService:
             WeeklyPrice.report_date == report.report_date
         ).first()
 
-        # 2. Fetch Statistiche (Focus su Leveraged Funds aka Whales)
+        # 2. Fetch Statistics (Focus on Leveraged Funds aka Whales)
         stats = self.db.query(ContractStatistics).filter(
             ContractStatistics.contract_id == contract_id,
             ContractStatistics.trader_category == 'lev_money',
@@ -140,7 +140,7 @@ class AnalyzerService:
             logger.warning("No statistics found for Leveraged Funds.")
             return
             
-        # 3. Calcolo Metriche
+        # 3. Metric Calculation
         current_val = report.lev_net
         
         # Robust Z-Score
@@ -160,8 +160,8 @@ class AnalyzerService:
         # 4. Context & Logic
         price_context = "Neutral"
         if price and price.close_vs_vwap_pct is not None:
-            # Se Close > VWAP = Strength (Markup)
-            # Se Close < VWAP = Weakness (Markdown/Accumulation?)
+            # If Close > VWAP = Strength (Markup)
+            # If Close < VWAP = Weakness (Markdown/Accumulation?)
             if price.close_price > price.reporting_vwap:
                 price_context = "Strength/Markup"
             else:
@@ -185,7 +185,7 @@ class AnalyzerService:
         
         if report.is_rollover_week:
             alert_level = "Low (Rollover)"
-            confidence = 10.0 # Bassa confidenza durante rollover
+            confidence = 10.0 # Low confidence during rollover
             
         # 6. Salva Alert
         alert = WhaleAlert(

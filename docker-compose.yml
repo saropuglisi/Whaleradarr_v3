@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: whaleradarr-backend
@@ -11,7 +11,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/whaleradarr
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=whaleradarr
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
       - REDIS_URL=redis://redis:6379/0
       - APP_ENV=development
     depends_on:
